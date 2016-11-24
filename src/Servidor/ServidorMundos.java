@@ -1,6 +1,6 @@
 package Servidor;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -66,7 +66,7 @@ public class ServidorMundos {
             
             jugador1.enemigo1 = jugador2;
             jugador2.enemigo1 = jugador1;
-            
+            ventana.desplegarMensaje("Todos los jugadores se han conectado");
             /*
             Los enemigos estan distribuidos de la siguiente manera
             JUGADOR 1
