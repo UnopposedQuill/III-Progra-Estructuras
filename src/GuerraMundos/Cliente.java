@@ -8,6 +8,8 @@ package GuerraMundos;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import javax.swing.JOptionPane;
 
@@ -18,8 +20,9 @@ import javax.swing.JOptionPane;
 public class Cliente {
    public static String IP_SERVER = "localhost"; //IP del Servidor
    JFrameGuerraMundos ventanaCliente; // Ventana del cliente
-   DataInputStream entrada = null;//leer comunicacion
-   DataOutputStream salida = null;//escribir comunicacion
+   ObjectOutputStream salida = null;//escribir comunicacion
+   ObjectInputStream entrada = null;//leer comunicacion
+
    Socket cliente = null;//para la comunicacion
    String nomCliente;// nombre del user
    /** Creates a new instance of Cliente */
@@ -34,8 +37,8 @@ public class Cliente {
           // se conecta con dos sockets al server, uno comunicacion otro msjes
          cliente = new Socket(Cliente.IP_SERVER, 8081);
          // inicializa las entradas-lectura y salidas-escritura
-         entrada = new DataInputStream(cliente.getInputStream());
-         salida = new DataOutputStream(cliente.getOutputStream());
+         salida = new ObjectOutputStream(cliente.getOutputStream());
+         entrada = new ObjectInputStream(cliente.getInputStream());
          // solicita el nombre del user
          nomCliente = JOptionPane.showInputDialog("Introducir Nick :");
          //Lo coloca en la ventana

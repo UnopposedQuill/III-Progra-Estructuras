@@ -2,14 +2,18 @@ package Servidor;
 import java.io.*;
 import java.net.*;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 /**
  *
  * @author Esteban
  */
 public class HiloServidor extends Thread{
     Socket cliente = null;
-    DataInputStream entrada = null;
-    DataOutputStream salida = null;
+    
+    ObjectOutputStream salida = null;
+    ObjectInputStream entrada = null;
+    
     String nombreUsuario;
     ServidorMundos servidor;
     
@@ -18,6 +22,10 @@ public class HiloServidor extends Thread{
     HiloServidor enemigo3 = null;
     
     int numeroJugador;
+    String mensaje;
+    
+    
+
     
     public HiloServidor (Socket jugador, ServidorMundos servidor, int numJugador){
         this.cliente = jugador;
@@ -37,8 +45,9 @@ public class HiloServidor extends Thread{
     @Override
     public void run(){
         try{
-            entrada = new DataInputStream(cliente.getInputStream());
-            salida = new DataOutputStream(cliente.getOutputStream());
+            //Primero va el output
+            salida = new ObjectOutputStream(cliente.getOutputStream());
+            entrada = new ObjectInputStream(cliente.getInputStream());
             
             this.setNombreUsuario(entrada.readUTF());
             
@@ -69,28 +78,56 @@ public class HiloServidor extends Thread{
                    enemigo1.salida.writeInt(columna);// envia columna
                    enemigo1.salida.writeInt(fila);// envia fila
                    
+                   
+                   
                    System.out.println("Op1: lee col,fil, envia al enemigo, 1, col, fila: "+columna+" , "+fila );
                    break;
-                case 2:// 
-                    
-                    
+                case 2:
+                    //Enviar mensajes a todos los jugadores
+                     mensaje = entrada.readUTF();
+                     System.out.println("Caso 2");
+                     // envia un 4 al threadCliente enemigo
+                     if (enemigo1 != null){
+                        enemigo1.salida.writeInt(4);
+                        // envia el mensaje al thread cliente enemigo
+                        enemigo1.salida.writeUTF(mensaje);
+                        enemigo1.salida.flush();
+                     }
+                     
+                     if (enemigo2 != null){
+                        // envia un 4 al thradCliente enemigo
+                        enemigo2.salida.writeInt(4);
+                        // envia el mensaje al thread cliente enemigo
+                        enemigo2.salida.writeUTF(mensaje);
+                        enemigo2.salida.flush();
+                     }
+                     if (enemigo3 != null){
+                        // envia un 4 al thradCliente enemigo
+                        enemigo3.salida.writeInt(4);
+                        // envia el mensaje al thread cliente enemigo
+                        enemigo3.salida.writeUTF(mensaje);
+                        enemigo3.salida.flush();
+                     }
                    break;
                 case 3: //le envia el status, que es el numero de jugador y el nombre enemigo
                     salida.writeInt(3);
                     salida.writeInt(numeroJugador);
+                    
                     if (enemigo1 != null)
                         salida.writeUTF(enemigo1.nombreUsuario);
                     else
                         salida.writeUTF("");
                     System.out.println("3. Op3: envia 3 y numeroJugador y enemigo: "+ numeroJugador);
+                    salida.flush();
                    break;
                  case 4:
                      // lee el mensaje enviado desde el jframe
-                     String mensaje = entrada.readUTF();
+                     mensaje = entrada.readUTF();
                      // envia un 4 al thradCliente enemigo
                      enemigo1.salida.writeInt(4);
                      // envia el emnsaje al thread cliente enemigo
-                     enemigo1.salida.writeUTF(mensaje+"OtraCosa");
+                     enemigo1.salida.writeUTF(mensaje);
+                     enemigo1.salida.flush();
                      System.out.println("Op4: envia 4 y mensaje: "+ mensaje);
                  break;
                  case 5:
@@ -105,10 +142,45 @@ public class HiloServidor extends Thread{
                      enemigo1.salida.writeInt(fil);
                      System.out.println("Op5: envia columna fila para bomba ");
                  break;
+                 case 6:
+                    //Envio mi array a todos los enemigos y tambien indico que numero de jugador soy
+                    int numJugador = entrada.readInt(); 
+                    int[][] miTablero = (int[][])entrada.readUnshared();
+                    System.out.println("TABLERO");
+                    for (int i = 0; i < 15 ; i++){
+                        for (int j = 0; j < 15 ; j++){
+                            System.out.print(miTablero[j][i]);
+                        }
+                        System.out.println();
+                    }
+                    if (enemigo1 != null){
+                        enemigo1.salida.writeInt(6); //Actualizar tablero enemigo
+                        enemigo1.salida.writeInt(numJugador);
+                        enemigo1.salida.writeUnshared(miTablero);
+                        System.out.println("Se envia la informacion a enemigo1");
+                    }
+                    
+                    if (enemigo2 != null){
+                        enemigo2.salida.writeInt(6); //Actualizar tablero enemigo
+                        enemigo2.salida.writeInt(numJugador);
+                        enemigo2.salida.writeUnshared(miTablero);
+                    }
+                    
+                    if (enemigo3 != null){
+                        enemigo3.salida.writeInt(6); //Actualizar tablero enemigo
+                        enemigo3.salida.writeInt(numJugador);
+                        enemigo3.salida.writeUnshared(miTablero);
+                    }
+                    
+                    servidor.ventana.desplegarMensaje("Se ha actualizado el array en todos los usuarios");
+                    
+                break;
                 }
             }catch (IOException e) {
               System.out.println("El cliente termino la conexion");
               break;
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(HiloServidor.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         
