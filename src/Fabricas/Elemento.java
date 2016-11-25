@@ -26,4 +26,12 @@ public abstract class Elemento {
         this.posicionX = posicionX;
         this.posicionY = posicionY;
     }
+    
+    public int getPosicionX() {
+        return posicionX;
+    }
+
+    public int getPosicionY() {
+        return posicionY;
+    }
 }
