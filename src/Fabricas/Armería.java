@@ -15,4 +15,7 @@ public class Armería extends Fabrica{
         super(orientacionFabrica, posicionX, posicionY);
     }
     
+    public Arma crearArma(int tipoArma){
+        return new Arma(tipoArma);
+    }
 }

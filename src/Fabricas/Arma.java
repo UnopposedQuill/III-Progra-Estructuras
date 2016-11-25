@@ -12,4 +12,8 @@ package Fabricas;
  */
 public class Arma {
     private int tipoArma;
+
+    public Arma(int tipoArma) {
+        this.tipoArma = tipoArma;
+    }
 }

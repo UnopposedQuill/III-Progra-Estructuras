@@ -17,4 +17,10 @@ public abstract class Fabrica extends Elemento{
         super(posicionX, posicionY);
         this.orientacionFabrica = orientacionFabrica;
     }
+
+    public Orientacion getOrientacionFabrica() {
+        return orientacionFabrica;
+    }
+    
+    
 }
