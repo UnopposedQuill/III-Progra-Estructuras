@@ -13,6 +13,7 @@ public class Mina extends Fabrica{
 
     private int cantidadProduccion;
     private int cadenciaProduccion;
+    private HiloMina hiloPropio;
 
     /**
      * Este constructor inicializa la mina con una cierta cantidad de producción y cadencia de producción,
@@ -27,6 +28,7 @@ public class Mina extends Fabrica{
         super(orientacionFabrica, posicionX, posicionY);
         this.cantidadProduccion = cantidadProduccion;
         this.cadenciaProduccion = cadenciaProduccion;
+        this.hiloPropio = new HiloMina(this);
     }
 
     /**
