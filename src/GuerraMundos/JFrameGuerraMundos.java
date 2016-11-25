@@ -5,19 +5,13 @@
  */
 package GuerraMundos;
 
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.awt.LayoutManager;
 import java.awt.event.MouseAdapter;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.LayoutStyle;
 
 /**
  *
