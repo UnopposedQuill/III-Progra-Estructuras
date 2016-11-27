@@ -73,14 +73,24 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
     ImageIcon iconoCirculo = new ImageIcon(getClass().getResource("ccirculo.GIF"));
     
     int componenteColocar = 0;
+    int orientacionColocarFabrica = 0;
     int dineroJugador = 4000;
-    int turnoJugador=1;
+    int turnoJugador = 1;
     //numero de jugador 1 a 4
     int numeroJugador = 0;
     
+    /*
+    Misil (1x1) = 0 Se ocupan 500 KG de acero
+    MultiShot (Acierta y crea 4 disparos mas al azar 1x1) = 1 Se ocupan 1000 KG de acero
+    Bomba (3 bombas con un rango 1x2 o 2x1 al azar) = 2 Se ocupan 2000 KG de acero
+    ComboShot (10 disparos de misil en un turno) = 3 Se ocupan 5000 KG de acero
+    */
+    int tipoDisparo = 0;
+    int cantidadDisparosRestantes = 0;
+    
     int mundoInicial = 1;
-    int mercadoInicial = 1;
-    int orientacionColocarFabrica = 0;
+    int mercadoInicial = 1;;
+
     
     boolean atacandoEnemigo1 = false;
     boolean atacandoEnemigo2 = false;
@@ -102,10 +112,9 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
                 
                 //aclickSobreTablero(evt);ñade el listener al boton
                 tableroLabels[i][j].addMouseListener(new MouseAdapter() {
+                @Override
                 public void mouseClicked(java.awt.event.MouseEvent evt) {
-                        
                     clickSobreTablero(evt);
-                    
                 }
                 });
                 // en logico indica estado en disponible
@@ -128,55 +137,8 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
         }
     }
     
-    // este metodo es la respuesta del cliente al click del enemigo
-    public void marcar(int columna, int fila)
-    {
-        // marca el tablero con num de jugador
-        tableroLogico[columna][fila] = turnoJugador;
-        // si soy el 1, marco con o que es el 2, sino con X
-        // pues es el turno del enemigo que estoy marcando
-        if (numeroJugador == 1)
-            tableroLabels[columna][fila].setIcon(iconoCirculo);
-        else
-            tableroLabels[columna][fila].setIcon(iconoEquiz);
-            
-        // pregunta si gano el enemigo
-            if(haGanado())
-            {
-                JOptionPane.showMessageDialog(null, "Ha ganado el jugador "+turnoJugador);
-                
-                reiniciarJuego();
-            }          
-        // este fue el clic del enemigo, marco ahora mi turno
-        turnoJugador = numeroJugador;
-        jLabel1.setText("Turno del Jugador "+turnoJugador);
-        
-        
-//        // es similar a validar si el disparo es bomba o barco
-//        if (Integer.parseInt(txfColumna.getText()) == columna && 
-//                Integer.parseInt(txfFila.getText()) == fila)
-//        {
-//            try {
-//                //escribe la opcion 5 al server
-//                // para que la pase al enemigo
-//                // y haga el metodo de generar bombas
-//                cliente.salida.writeInt(5);
-//                cliente.salida.writeInt(columna);
-//                cliente.salida.writeInt(fila);
-//                
-//            } catch (IOException ex) {
-//                
-//            }
-//        
-//        }
-        
-    }
+
     
-    public void bomba(int col, int fila)
-    {
-        JOptionPane.showMessageDialog(this, "Generar bombas y enviarlas una " +
-                "a una al enemigo ("+col+","+fila+")");
-    }
     
     public void clickSobreTablero(java.awt.event.MouseEvent evt)
     {
@@ -196,13 +158,25 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
         if(tableroLogico[columna][fila]!=0)
             return;
 
+        /*
+        Misil (1x1) = 0 Se ocupan 500 KG de acero
+        MultiShot (Acierta y crea 4 disparos mas al azar 1x1) = 1 Se ocupan 1000 KG de acero
+        Bomba (3 bombas con un rango 1x2 o 2x1 al azar) = 2 Se ocupan 2000 KG de acero
+        ComboShot (10 disparos de misil en un turno) = 3 Se ocupan 5000 KG de acero
+        */
         if(atacandoEnemigo1 == true){
+            //Se está atacando al enemigo 1
+            
             
         }
         else if (atacandoEnemigo2 == true){
+            //Se está atacando al enemigo 1
+            
             
         }
         else if (atacandoEnemigo3 == true){
+            //Se está atacando al enemigo 1
+            
             
         }
         else{
@@ -353,80 +327,6 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
         jLabel1.setText("Turno del Jugador "+turnoJugador);
  
     }
-    
-    public void clickSobreTableroDisparo(java.awt.event.MouseEvent evt)
-    {
-        // obtiene el boton 
-        JButton botonTemp = (JButton)evt.getComponent();
-        // obtiene el i,j de action command del boton
-        String identificadorBoton = botonTemp.getActionCommand();
-        
-        // separa el string del action comand para obtener columnas
-        int columna = 
-          Integer.parseInt(identificadorBoton.substring(0,identificadorBoton.indexOf(",")));
-        int fila = 
-          Integer.parseInt(identificadorBoton.substring(1+identificadorBoton.indexOf(",")));
-        
-        // si ya se disparo entonces nada
-        if(tableroLogico[columna][fila]!=0)
-            return;
-        
-        // si es mi turno continua, si no return
-        if (numeroJugador != turnoJugador)
-            return;
-        
-        // como es turno del cliente marca el logico con su numero
-        tableroLogico[columna][fila]=turnoJugador;
-        // si era el jugador 1 marca con x y cambia el turno a jugador 2
-        if (numeroJugador == 1)
-        {
-            
-            tableroLabels[columna][fila].setIcon(iconoEquiz);
-            turnoJugador=2;
-        }
-        else
-        {
-            // si era jugador 3, marca circulo y turno jugador 1
-            tableroLabels[columna][fila].setIcon(iconoCirculo);
-            turnoJugador=1;
-        }
-        
-        // si era el jugador 1 marca con x y cambia el turno a jugador 2
-        if (numeroJugador == 1){
-            turnoJugador = 2;
-        }
-        else if (numeroJugador == 2){
-            turnoJugador = 3;
-        }
-        else if (numeroJugador == 3){
-            turnoJugador = 4;
-        }
-        else{
-            turnoJugador = 1;
-        }
-        // muestra el turno del jugador
-         jLabel1.setText("Turno del Jugador "+turnoJugador);
-        
-        try {
-            // como el cliente dio clic debe enviar al servidor las coordenadas
-            // el servidor se las pasara al thread cliente para que este
-            // las muestre (haga el marcar)
-            // envia las coordenadas
-            cliente.salida.writeInt(1);
-            cliente.salida.writeInt(columna);
-            cliente.salida.writeInt(fila);
-        } catch (IOException ex) {
-            
-        }
-         
-        // si gano el jugador 1 lo indica
-        if(haGanado())
-        {
-            JOptionPane.showMessageDialog(null, "Ha ganado el jugador 1");
-            reiniciarJuego();
-        }
-    }
-    
     boolean haGanado()
     {
         
