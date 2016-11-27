@@ -37,12 +37,7 @@ public class HiloCliente extends Thread{
             switch(opcion)
             {
                case 1://mensaje enviado
-                  int col = entrada.readInt();//lee columna
-                  int fila = entrada.readInt();//lee fila
-                  // llama a marcar, que es lo que hace el cliente cuando
-                  // el enemigo marco la sailla
-                  vcli.marcar(col,fila);
-                  System.out.println("Op1: lee col y fila: "+col+" , "+fila);
+                  
                   break;
                case 2://se lee el nombre del user  
                   menser = entrada.readUTF();
@@ -66,17 +61,10 @@ public class HiloCliente extends Thread{
                 break;
                 
                 case 5:
-                     // lee la columna
-                     int col1 = entrada.readInt();
-                     // lee la fila
-                     int fil1 = entrada.readInt();
-                     // hace el emtodo cliente para generar bomba
-                     vcli.bomba(col1,fil1);
-                     
-                     System.out.println("Op5: recibe columna fila para bomba ");
-                 break;
+                    System.out.println("OP5");
+                    break;
                  
-                 case 6:
+                case 6:
                      /* Actualizo el tablero del enemigo correspondiente
                      
                     Los enemigos estan distribuidos de la siguiente manera

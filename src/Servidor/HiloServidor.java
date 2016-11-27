@@ -121,27 +121,18 @@ public class HiloServidor extends Thread{
                     salida.flush();
                    break;
                  case 4:
-                     // lee el mensaje enviado desde el jframe
-                     mensaje = entrada.readUTF();
-                     // envia un 4 al thradCliente enemigo
-                     enemigo1.salida.writeInt(4);
-                     // envia el emnsaje al thread cliente enemigo
-                     enemigo1.salida.writeUTF(mensaje);
-                     enemigo1.salida.flush();
-                     System.out.println("Op4: envia 4 y mensaje: "+ mensaje);
-                 break;
+                    // lee el mensaje enviado desde el jframe
+                    mensaje = entrada.readUTF();
+                    // envia un 4 al thradCliente enemigo
+                    enemigo1.salida.writeInt(4);
+                    // envia el emnsaje al thread cliente enemigo
+                    enemigo1.salida.writeUTF(mensaje);
+                    enemigo1.salida.flush();
+                    System.out.println("Op4: envia 4 y mensaje: "+ mensaje);
+                    break;
                  case 5:
-                     // lee la columna
-                     int col = entrada.readInt();
-                     // lee la fila
-                     int fil = entrada.readInt();
-                     // envia un 5 al thradCliente enemigo
-                     enemigo1.salida.writeInt(5);
-                     // envia el emnsaje al thread cliente enemigo
-                     enemigo1.salida.writeInt(col);
-                     enemigo1.salida.writeInt(fil);
-                     System.out.println("Op5: envia columna fila para bomba ");
-                 break;
+                     
+                    break;
                  case 6:
                     //Envio mi array a todos los enemigos y tambien indico que numero de jugador soy
                     int numJugador = entrada.readInt(); 

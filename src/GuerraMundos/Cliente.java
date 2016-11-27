@@ -5,8 +5,6 @@
  */
 package GuerraMundos;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -25,7 +23,9 @@ public class Cliente {
 
    Socket cliente = null;//para la comunicacion
    String nomCliente;// nombre del user
-   /** Creates a new instance of Cliente */
+   /** Creates a new instance of Cliente
+     * @param vent
+     * @throws java.io.IOException */
    public Cliente(JFrameGuerraMundos vent) throws IOException
    {      
       this.ventanaCliente=vent;
