@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Fabricas;
+package tercera.progra;
 
 /**
  * Los elementos serán los tipos de elementos que habrán en el grafo del mundo, estos son abstractos para
