@@ -41,20 +41,20 @@ public class HiloCliente extends Thread{
                   int fila = entrada.readInt();//lee fila
                   // llama a marcar, que es lo que hace el cliente cuando
                   // el enemigo marco la sailla
-                  vcli.marcar(col,fila);
+                  //vcli.marcar(col,fila);
                   System.out.println("Op1: lee col y fila: "+col+" , "+fila);
                   break;
                case 2://se lee el nombre del user  
                   menser = entrada.readUTF();
                   // coloca el nombre del enemigo
-                  vcli.setEnemigo(menser);                  
+                  //vcli.setEnemigo(menser);                  
                   System.out.println("Op2: lee nombre enemigo: "+menser);
                   break;
                case 3://lee el numero del jugador
                   vcli.numeroJugador = entrada.readInt();
                   // lee el nomnre del enemigo vuando pide el status y lo coloca
                   // en la pantalla cliente
-                  vcli.setEnemigo(entrada.readUTF());
+                  //vcli.setEnemigo(entrada.readUTF());
                   System.out.println("OP3, lee numero de jugador "+vcli.numeroJugador);
                   break;
                 case 4:
@@ -71,7 +71,7 @@ public class HiloCliente extends Thread{
                      // lee la fila
                      int fil1 = entrada.readInt();
                      // hace el emtodo cliente para generar bomba
-                     vcli.bomba(col1,fil1);
+                     //vcli.bomba(col1,fil1);
                      
                      System.out.println("Op5: recibe columna fila para bomba ");
                  break;
@@ -111,6 +111,7 @@ public class HiloCliente extends Thread{
              switch (vcli.numeroJugador) {
                  case 1:
                      //Yo soy el jugador 1
+                     /*
                      if (numEnemigo == 2){
                          vcli.tableroEnemigo1 = tableroAcualizar;
                      }
@@ -156,7 +157,7 @@ public class HiloCliente extends Thread{
                      else if (numEnemigo == 3){
                          vcli.tableroEnemigo3 = tableroAcualizar;
                      }
-                     break;
+                     break;*/
                  default:
                      break;
              }

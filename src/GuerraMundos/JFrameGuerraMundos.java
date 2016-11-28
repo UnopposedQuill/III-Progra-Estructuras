@@ -5,19 +5,22 @@
  */
 package GuerraMundos;
 
+import com.sun.xml.internal.ws.server.sei.TieHandler;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JOptionPane;
+import java.util.logging.*;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 
 /**
  *
  * @author Esteban
  */
-public class JFrameGuerraMundos extends javax.swing.JFrame {
+public class JFrameGuerraMundos extends JFrame {
 
     
     /**
@@ -27,8 +30,11 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
         try {
             // esto es parte del gato
             initComponents();
+            /*
             generarTablero();
-            
+            */
+            this.Mundo.setRowHeight(42);
+            this.dibujarTablero();
             // Cra una cliente que es su coenxion al server
             cliente = new Cliente(this);
             cliente.conexion();
@@ -36,6 +42,7 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
             // pide el status al server, el server le enviara
             // al cliente el numero jugador que es y el nombre
             // enemigo
+            
             cliente.salida.writeInt(3);
             cliente.salida.flush();
             
@@ -48,7 +55,18 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
     Cliente cliente;
     //----------------------------------
     
-    
+    int componenteColocar = 0;
+    int dineroJugador = 4000;
+    int turnoJugador=1;
+    //numero de jugador 1 a 4
+    int numeroJugador = 0;
+    int mundoInicial = 1;
+    int mercadoInicial = 1;
+    int orientacionColocarFabrica = 0;
+    boolean atacandoEnemigo1 = false;
+    boolean atacandoEnemigo2 = false;
+    boolean atacandoEnemigo3 = false;
+    /*
     // cambiar este valor para dimensiones
     public static int DIMENSIONES = 15;
     // Tablero con objetos JButton
@@ -66,19 +84,169 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
     // crea la imagen circulo
     ImageIcon iconoCirculo = new ImageIcon(getClass().getResource("ccirculo.GIF"));
     
-    int componenteColocar = 0;
-    int dineroJugador = 4000;
-    int turnoJugador=1;
-    //numero de jugador 1 a 4
-    int numeroJugador = 0;
-    
-    int mundoInicial = 1;
-    int mercadoInicial = 1;
-    int orientacionColocarFabrica = 0;
-    
-    boolean atacandoEnemigo1 = false;
-    boolean atacandoEnemigo2 = false;
-    boolean atacandoEnemigo3 = false;
+    */
+    private void dibujarTablero(){
+        
+        //Aquí irán los datos de guía, estos pasarán de estar aqui, a ir como parámetro o algo por el estilo
+        Object[][] datosGuia = new Object[15][15];
+        boolean dibujarMinaAgujero = false;
+        //dentro de estos fors se asignan los datos, por ahora sólo hago que los dibuje a modo de tablero
+        //de ajedrez dado que no tengo la matriz de datos
+        for (int i = 0; i < 15; i++) {
+            for (int j = 0; j < 15; j++) {
+                if(dibujarMinaAgujero){
+                    datosGuia[i][j] = TipoFabrica.AGUJERO;
+                }
+                else{
+                    datosGuia[i][j] = TipoFabrica.MINA;
+                }
+                dibujarMinaAgujero = !dibujarMinaAgujero;
+            }
+        }
+        
+        //aquí irán los datos que serán dibujados en la tabla
+        Object[][] datos = new Object[15][15];
+        //por ahora sólo tengo estas burdas imágenes
+        // crea imagen blanco
+        ImageIcon iconoVacio = new ImageIcon(getClass().getResource("cvacio.GIF"));
+        // crea imagen X
+        ImageIcon iconoEquiz = new ImageIcon(getClass().getResource("cequiz.GIF"));
+        // crea la imagen circulo
+        ImageIcon iconoCirculo = new ImageIcon(getClass().getResource("ccirculo.GIF"));
+        //ahora toca llenar la tabla de datos
+        for (int i = 0; i < 15; i++) {
+            for (int j = 0; j < 15; j++) {
+                Object objetoGuia = datosGuia[i][j];
+                if(objetoGuia instanceof TipoFabrica){//este es un if de validación, sino, revienta todo
+                    //ahora creo el botón a renderizar
+                    JButton botonARenderizar = new JButton();
+                    //esto es un switch de todos los tipos de cosas que debemos dibujar
+                    switch((TipoFabrica)objetoGuia){
+                        case AGUJERO:{//agujero negro...
+                            //le seteo la imagen al botón
+                            botonARenderizar.setIcon(iconoEquiz);
+                            //lo ingreso en la tabla
+                            datos[i][j] = botonARenderizar;
+                        }
+                        case BLANK:{
+                            //le seteo la imagen al botón
+                            botonARenderizar.setIcon(iconoVacio);
+                            //lo ingreso en la tabla
+                            datos[i][j] = botonARenderizar;
+                        }
+                        case MINA:{
+                            //le seteo la imagen al botón
+                            botonARenderizar.setIcon(iconoCirculo);
+                            //lo ingreso en la tabla
+                            datos[i][j] = botonARenderizar;
+                        }
+                        default:{//como no tengo más imágenes, entonces pongo el default
+                            //a estos en lugar de imagen les pongo de texto lo que eran
+                            botonARenderizar.setText(TipoFabrica.fakeToString((TipoFabrica)objetoGuia));
+                            //lo ingreso en la tabla
+                            datos[i][j] = botonARenderizar;
+                        }
+                    }
+                }//si no calza en tipo fabrica, entonces se retorna y se lava las manos
+                datos[i][j] = new JButton("Desconocido");
+            }
+        }
+                
+        
+        //aquí irán los datos de las columnas
+        String [] columnas = new String[15];
+        //las columnas irán mostradas con la posición, ¿no?
+        for (int i = 0; i < 15; i++) {
+            columnas[i] = String.valueOf(i);
+        }
+        
+        
+        DefaultTableModel dtm = new DefaultTableModel(datos, columnas){ //a partir de aquí me pongo a modificar algunos aspectos del modelo
+            
+            //con esto defino los tipos por fuerza que va a tener el modelo
+            Class[] tipos = new Class[]{
+            //estos son los tipos de datos que van a ir en cada columna, NO MODIFICAR,
+            //esta es el alma del renderizador
+            JButton.class,
+            JButton.class,
+            JButton.class,
+            JButton.class,
+            JButton.class, //son 15 columnas, 15 clases
+            
+            JButton.class,
+            JButton.class,
+            JButton.class,
+            JButton.class,
+            JButton.class,
+            
+            JButton.class,
+            JButton.class,
+            JButton.class,
+            JButton.class,
+            JButton.class,};
+            
+            //este override es para modificar lo que consigue al intentar la tabla
+            @Override
+            public Class getColumnClass(int columnIndex){
+                //Este método es invocado por el CellRenderer para saber que dibujar en la celda,
+                //observen que estamos retornando la clase que definimos de antemano.
+                return tipos[columnIndex];
+            }
+            
+            @Override
+            public boolean isCellEditable(int row, int column){
+                //Sobrescribo este método para evitar que la columna que contiene los botones sea editada
+                return !(this.getColumnClass(column).equals(JButton.class));
+            }
+            
+        };
+        this.Mundo.setModel(dtm);//aquí le ingreso a la tabla todos los cambios
+        
+        //esta es la parte que decide QUÉ DEBE DIBUJAR
+        this.Mundo.setDefaultRenderer(JButton.class, new TableCellRenderer(){
+            /**
+             * Este método sólo se encarga de una sóla y simple idiotez:
+             * retornar lo que entra xD
+             * El asunto es que a la hora de pintar la tabla dibuje el objeto tal
+             * y como entra, en lugar de hacerlo asquerosamente de manera default 
+             * Resumen: hace que aparezca un botón cuando aparece un botón en la matriz de datos
+             */
+            @Override
+            public Component getTableCellRendererComponent(JTable jtable, Object objeto, boolean estaSeleccionado, boolean tieneElFoco, int fila, int columna) {
+                return (Component) objeto;
+            }
+        });
+        //aquí sólo resta hacer el panel que contendrá la tabla junto con el mouse listener
+        
+        //para definir las accionas al dar click en la tabla
+        this.Mundo.addMouseListener(new MouseAdapter() {
+            /*
+            el mouse listener se coloca en la tabla y no en la ventana, así logro saber en qué celda se dio
+            clic, en lugar de buscar por el frame al que pertenece
+            el asunto es que tengo que capturar cuando el mouse clickea en el botón de mostrar el mapa
+            */
+            @Override
+            public void mouseClicked(MouseEvent e){   
+                
+                //esto consigue la fila y columna del evento
+                int fila = Mundo.rowAtPoint(e.getPoint());
+                int columna = Mundo.columnAtPoint(e.getPoint());
+                
+                /**
+                 * Pregunto si hizo clic sobre la celda que contiene un botón, 
+                 * este if puede quitarlo si quiere, pero a mi parecer mejor dejarlo
+                 */
+                if (Mundo.getModel().getColumnClass(columna).equals(JButton.class)) {
+                    //significa que sí dio en el botón, por lo que hago que dibuje el mapa
+                    //ingresar aquí lo que se desea que suceda al presionar uno de los botones
+                    System.out.println("Se presionó el botón en la posición: " + fila + ", " + columna);
+                }
+            }
+        });
+        
+    }
+    /*
+            
     void generarTablero()
     {
         for(int i=0;i<DIMENSIONES;i++)
@@ -539,7 +707,7 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
         }
         
     }
-    
+    */
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -566,6 +734,8 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
         bBomba = new javax.swing.JButton();
         bComboShot = new javax.swing.JButton();
         pTableroJuego = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        Mundo = new javax.swing.JTable();
         jPanel3 = new javax.swing.JPanel();
         bMercado = new javax.swing.JButton();
         bMina = new javax.swing.JButton();
@@ -668,7 +838,7 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
                         .addComponent(bMultiShot, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                     .addComponent(bBomba, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(bComboShot, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(11, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -683,15 +853,50 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
+        Mundo.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4", "Title 5", "Title 6", "Title 7", "Title 8", "Title 9", "Title 10", "Title 11", "Title 12", "Title 13", "Title 14", "Title 15"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, true, true, true, true, true, true, true, true, true, true, true, true, true, true
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane2.setViewportView(Mundo);
+        if (Mundo.getColumnModel().getColumnCount() > 0) {
+            Mundo.getColumnModel().getColumn(0).setResizable(false);
+        }
+
         javax.swing.GroupLayout pTableroJuegoLayout = new javax.swing.GroupLayout(pTableroJuego);
         pTableroJuego.setLayout(pTableroJuegoLayout);
         pTableroJuegoLayout.setHorizontalGroup(
             pTableroJuegoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 755, Short.MAX_VALUE)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 751, Short.MAX_VALUE)
         );
         pTableroJuegoLayout.setVerticalGroup(
             pTableroJuegoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addComponent(jScrollPane2)
         );
 
         bMercado.setText("Mercado");
@@ -1013,7 +1218,7 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
                                             .addComponent(jLabel9)
                                             .addComponent(jLabel10))
                                         .addGap(18, 18, 18)
-                                        .addComponent(bVerMapaPropio, javax.swing.GroupLayout.DEFAULT_SIZE, 107, Short.MAX_VALUE)))
+                                        .addComponent(bVerMapaPropio, javax.swing.GroupLayout.DEFAULT_SIZE, 125, Short.MAX_VALUE)))
                                 .addGap(44, 44, 44)
                                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1169,7 +1374,7 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
         atacandoEnemigo1 = true;
         atacandoEnemigo2 = false;
         atacandoEnemigo3 = false;
-        mostrarTablero(1);
+        //mostrarTablero(1);
     }//GEN-LAST:event_bAtacarEnemigo1ActionPerformed
 
     private void bAtacarEnemigo2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bAtacarEnemigo2ActionPerformed
@@ -1177,7 +1382,7 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
         atacandoEnemigo1 = false;
         atacandoEnemigo2 = true;
         atacandoEnemigo3 = false;
-        mostrarTablero(2);
+        //mostrarTablero(2);
     }//GEN-LAST:event_bAtacarEnemigo2ActionPerformed
 
     private void bAtacarEnemigo3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bAtacarEnemigo3ActionPerformed
@@ -1185,7 +1390,7 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
         atacandoEnemigo1 = false;
         atacandoEnemigo2 = false;
         atacandoEnemigo3 = true;
-        mostrarTablero(3);
+        //mostrarTablero(3);
     }//GEN-LAST:event_bAtacarEnemigo3ActionPerformed
 
     private void bIniciarPartidaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bIniciarPartidaActionPerformed
@@ -1198,7 +1403,7 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
         atacandoEnemigo1 = false;
         atacandoEnemigo2 = false;
         atacandoEnemigo3 = false;
-        mostrarTablero(0);
+        //mostrarTablero(0);
     }//GEN-LAST:event_bVerMapaPropioActionPerformed
 
                                      
@@ -1218,6 +1423,7 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
         txaMensajes.append(texto+"\n");
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTable Mundo;
     private javax.swing.JButton bArmeria;
     private javax.swing.JButton bAtacarEnemigo1;
     private javax.swing.JButton bAtacarEnemigo2;
@@ -1257,6 +1463,7 @@ public class JFrameGuerraMundos extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lComponenteColocar;
     private javax.swing.JLabel lComponenteColocar1;
     private javax.swing.JLabel lDineroActual;
