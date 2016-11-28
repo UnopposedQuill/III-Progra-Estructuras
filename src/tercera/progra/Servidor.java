@@ -19,10 +19,10 @@ public class Servidor extends Thread{
     
     private boolean activo;
     private boolean pausado;
-    private int aumentoEmpaque;
-    private ArrayList <Producto> productos;
-    private ArrayList <Pedido> pedidos;
-    private ArrayList <Conexion> conexiones;
+    private ArrayList<Partida> partidasEnCurso;
+    private ArrayList<Jugador> jugadoresEsperaDuo;
+    private ArrayList<Jugador> jugadoresEsperaTrio;
+    private ArrayList<Jugador> jugadoresEsperaCuarteto;
     
     //Campos de las conexiones del servidor
     private ServerSocket serverSocket;
@@ -32,41 +32,15 @@ public class Servidor extends Thread{
     private ObjectInputStream flujoDeEntrada;
     
     /**
-     * Crea un servidor nuevo a partir de una lista de productos ya definida
-     * @param productos Los productos que tendrá el nuevo servidor
-     */
-    public Servidor(ArrayList<Producto> productos) {
-        this.activo = true;
-        this.pausado = false;
-        this.productos = productos;
-        this.pedidos = new ArrayList();
-        this.conexiones = new ArrayList<>();
-        this.aumentoEmpaque = 15;
-    }
-    
-    /**
-     * Crea un servidor nuevo a partir del nombre de un archivo XML que se supone que tiene los nombre de los XML
-     * @param XML El nombre 
-     */
-    public Servidor(String XML) {
-        this.activo = true;
-        this.pausado = false;
-        this.productos = this.conseguirProductosXML(XML);
-        this.pedidos = new ArrayList();
-        this.conexiones = new ArrayList<>();
-    }
-    
-    /**
      * Crea un servidor nuevo a partir del nombre de un archivo XML por defecto que está dentro de la carpeta del proyecto
      */
     public Servidor() {
         this.activo = true;
         this.pausado = false;
-        this.productos = this.conseguirProductosXML("Productos.xml");
-        this.pedidos = new ArrayList();
-        this.conexiones = new ArrayList<>();
-        this.aumentoEmpaque = 15;
-        System.out.println(this.toString());
+        this.partidasEnCurso = new ArrayList<>();
+        this.jugadoresEsperaDuo = new ArrayList<>();
+        this.jugadoresEsperaTrio = new ArrayList<>();
+        this.jugadoresEsperaCuarteto = new ArrayList<>();
     }
     
     /**
@@ -141,122 +115,6 @@ public class Servidor extends Thread{
     public boolean isPausado() {
         return pausado;
     }
-
-    /**
-     * Para conseguir los productos con los que está el servidor trabajando actualmente
-     * @return Los productos que tiene el servidor
-     */
-    public ArrayList<Producto> getProductos() {
-        return productos;
-    }
-
-    /**
-     * Para conseguir todos los pedidos que tiene el servidor en la base de datos actualmente
-     * @return Todos los pedidos que ha recibido el servidor
-     */
-    public ArrayList<Pedido> getPedidos() {
-        return pedidos;
-    }
-
-    public ArrayList<Conexion> getConexiones() {
-        return conexiones;
-    }
-
-    /**
-     * Este método busca el porcentaje extra de coste que tiene por empaque
-     * @return Un entero que representa el porcentaje extra que se aumenta al pedir express
-     */
-    public int getAumentoEmpaque() {
-        return aumentoEmpaque;
-    }
-
-    /**
-     * Este método modifica el porcentaje extra de coste a pagar por precio de empaque
-     * Nota: Sólo se modifica si el nuevo porcentaje es mayor o igual a 0
-     * @param aumentoEmpaque El nuevo porcentaje
-     */
-    public void setAumentoEmpaque(int aumentoEmpaque) {
-        if(0 <= aumentoEmpaque)
-            this.aumentoEmpaque = aumentoEmpaque;
-    }
-    
-    /**
-     * Esto es para agregar un nuevo producto a la base de datos del servidor, esta base de datos no admite ningún producto repetido
-     * @param nuevoProducto El producto que se desea agregar a la base de datos del servidor
-     * @return True si logró insertarlo correctamente, False en caso de que el producto ya estuviera en la base de datos o no haya podido insertarse correctamente
-     */
-    public boolean agregarProducto(Producto nuevoProducto){
-        if(this.productos.contains(nuevoProducto)){
-            return false;
-        }
-        boolean resultado = this.productos.add(nuevoProducto);
-        if(resultado){
-            this.guardarProductos();
-        }
-        return resultado;
-    }
-    
-    /**
-     * Este método busca un producto para cambiarlo por uno nuevo(cofcofModificarlocofcof)
-     * @param productoModificado El nuevo producto que va a tomar el lugar de uno con el mismo código dentro de la lista
-     * @return True si estaba "Y" fue cambiado exitosamente, False si: no estaba, no pudo ser removido, no pudo ser agredado, no pudo ser actualizado en el XML
-     */
-    public boolean modificarProducto(Producto productoModificado){
-        if(!this.productos.contains(productoModificado)){
-            return false;
-        }
-        boolean resultado = this.productos.remove(productoModificado);
-        if(resultado){
-            resultado = this.productos.add(productoModificado);
-            if(resultado){
-                guardarProductos();
-            }
-        }
-        return resultado;
-    }
-    
-    /**
-     * Este método revisa todos los pedidos y averigua el pedido con el ID más alto
-     * @return Un entero con el ID más alto, -1 es el valor para "no hay pedidos"
-     */
-    public int conseguirUltimoID(){
-        if(this.pedidos.isEmpty()){ 
-            return -1;
-        }
-        Pedido get = pedidos.get(0);
-        for (int i = 0; i < pedidos.size(); i++) {
-            get = pedidos.get(i);
-            if(get.getID() == -1 && i == 0){
-                return -1;
-            }
-            if(get.getID() == -1){
-                return pedidos.get(i-1).getID();
-            }
-        }
-        return get.getID();
-    }
-    
-    /**
-     * Este método actualiza todos los id de los pedidos de la lista de pedidos
-     */
-    public void actualizarIDPedidos(){
-        int IDMaximo = this.conseguirUltimoID()+1;
-        for (int i = 0; i < this.pedidos.size(); i++) {
-            Pedido pedidoActual = this.pedidos.get(i);
-            if(pedidoActual.getID() == -1){
-                pedidoActual.setID(IDMaximo);
-                IDMaximo++;
-            }
-        }
-        System.out.println(this.pedidos);
-    }
-    
-    /**
-     * Método para guardar los productos en una locación por default
-     */
-    public void guardarProductos(){
-        this.guardarProductosXML("Productos.xml");
-    }
     
     /**
      * Este método es el método que controla el servidor, lo que hace este método es que controla todas las nuevas conexiones
@@ -282,8 +140,6 @@ public class Servidor extends Thread{
                 //ya tengo las conexiones hechas, ahora tengo que ver qué hago con lo que el cliente le envió al servidor
                 try{
                     Mensaje mensajeRecibido = (Mensaje)flujoDeEntrada.readObject();//consigo el mensaje enviado (o intento hacerlo)
-                    System.out.println("Agregando mensaje al registro");
-                    this.conexiones.add(new Conexion(socketNuevo.getLocalAddress(), socketNuevo.getInetAddress(), mensajeRecibido.getTipoDelMensaje()));
                     System.out.println("Atendiendo Petición");
                     atenderPeticion(mensajeRecibido);//hago que el servidor atienda la petición
                 }catch(ClassNotFoundException | ClassCastException excep){

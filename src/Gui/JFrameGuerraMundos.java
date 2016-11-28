@@ -119,7 +119,6 @@ public class JFrameGuerraMundos extends JFrame {
                             //le seteo la imagen al botón
                             botonARenderizar.setIcon(iconoEquiz);
                             //lo ingreso en la tabla
-                            System.out.println("Agujero");
                             datos[i][j] = botonARenderizar;
                             break;
                         }
@@ -127,7 +126,6 @@ public class JFrameGuerraMundos extends JFrame {
                             //le seteo la imagen al botón
                             botonARenderizar.setIcon(iconoVacio);
                             //lo ingreso en la tabla
-                            System.out.println("Blank");
                             datos[i][j] = botonARenderizar;
                             break;
                         }
@@ -135,7 +133,6 @@ public class JFrameGuerraMundos extends JFrame {
                             //le seteo la imagen al botón
                             botonARenderizar.setIcon(iconoCirculo);
                             //lo ingreso en la tabla
-                            System.out.println("Mina");
                             datos[i][j] = botonARenderizar;
                             break;
                         }
