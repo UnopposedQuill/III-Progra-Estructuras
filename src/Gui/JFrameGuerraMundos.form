@@ -47,19 +47,21 @@
                   <Group type="102" attributes="0">
                       <Component id="jComboBox1" min="-2" pref="113" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="EnviarMensaje" pref="105" max="32767" attributes="0"/>
+                      <Component id="EnviarMensaje" max="32767" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jScrollPane2" pref="813" max="32767" attributes="0"/>
+              <Component id="jScrollPane2" min="-2" pref="893" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                      <Component id="lDineroActual" alignment="0" max="32767" attributes="1"/>
-                      <Component id="LabelTurno" alignment="0" max="32767" attributes="1"/>
-                      <Component id="NumeroMundo" alignment="0" min="-2" pref="216" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="MundoSiguiente" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="LabelTurno" alignment="1" min="-2" pref="216" max="-2" attributes="1"/>
+                      </Group>
+                      <Component id="NumeroMundo" alignment="1" min="-2" pref="216" max="-2" attributes="0"/>
                   </Group>
-                  <Component id="MundoSiguiente" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="lDineroActual" alignment="1" min="-2" pref="216" max="-2" attributes="1"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>

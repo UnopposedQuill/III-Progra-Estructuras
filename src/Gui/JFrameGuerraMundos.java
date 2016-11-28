@@ -119,29 +119,38 @@ public class JFrameGuerraMundos extends JFrame {
                             //le seteo la imagen al botón
                             botonARenderizar.setIcon(iconoEquiz);
                             //lo ingreso en la tabla
+                            System.out.println("Agujero");
                             datos[i][j] = botonARenderizar;
+                            break;
                         }
                         case BLANK:{
                             //le seteo la imagen al botón
                             botonARenderizar.setIcon(iconoVacio);
                             //lo ingreso en la tabla
+                            System.out.println("Blank");
                             datos[i][j] = botonARenderizar;
+                            break;
                         }
                         case MINA:{
                             //le seteo la imagen al botón
                             botonARenderizar.setIcon(iconoCirculo);
                             //lo ingreso en la tabla
+                            System.out.println("Mina");
                             datos[i][j] = botonARenderizar;
+                            break;
                         }
                         default:{//como no tengo más imágenes, entonces pongo el default
                             //a estos en lugar de imagen les pongo de texto lo que eran
                             botonARenderizar.setText(TipoFabrica.fakeToString((TipoFabrica)objetoGuia));
                             //lo ingreso en la tabla
                             datos[i][j] = botonARenderizar;
+                            break;
                         }
                     }
                 }//si no calza en tipo fabrica, entonces se retorna y se lava las manos
-                datos[i][j] = new JButton("Desconocido");
+                else{
+                    datos[i][j] = new JButton("Desconocido");
+                }
             }
         }
                 
@@ -830,16 +839,17 @@ public class JFrameGuerraMundos extends JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(EnviarMensaje, javax.swing.GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)))
+                        .addComponent(EnviarMensaje, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 813, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 893, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(lDineroActual, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(LabelTurno, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(NumeroMundo, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(MundoSiguiente))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(MundoSiguiente)
+                            .addComponent(LabelTurno, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(NumeroMundo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(lDineroActual, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
