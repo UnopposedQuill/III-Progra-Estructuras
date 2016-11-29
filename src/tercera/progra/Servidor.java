@@ -167,9 +167,30 @@ public class Servidor extends Thread{
     private void atenderPeticion(Mensaje mensajeAAtender){
         switch(mensajeAAtender.getTipoDelMensaje()){
             case actualizarTablas:{
-                System.out.println("Se desea actualizar las tablas");
+                System.out.println("Se desea actualizar las tablas de cada jugador");
+                mensajeAAtender.setDatoDeRespuesta(this.partidasEnCurso);
+                this.enviarMensaje(mensajeAAtender);
             }
         }
+    }
+    
+    /**
+     * Este método busca entre todas las partidas en curso por un determinado jugador, y retorna la partida en la está
+     * este método es usado en servidor para que sepa cuál partida debe modificar
+     * @param jugadorABuscar El jugador a buscar
+     * @return La partida en la que encontró el jugador, o null, si no encontró el jugador
+     */
+    private Partida encontrarPartidaDelJugador(Jugador jugadorABuscar){
+        for (int i = 0; i < partidasEnCurso.size(); i++) {
+            Partida getPartida = partidasEnCurso.get(i);
+            for (int j = 0; j < getPartida.getJugadores().size(); j++) {
+                Jugador getJugador = getPartida.getJugadores().get(j);
+                if(jugadorABuscar.equals(getJugador)){
+                    return getPartida;
+                }
+            }
+        }
+        return null;
     }
     
     private void enviarMensaje(Mensaje mensajeAEnviar){

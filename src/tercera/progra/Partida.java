@@ -11,8 +11,27 @@ import java.util.*;
  *
  * @author esteban
  */
-class Partida {
-    private int turnoJugador;
-    private ArrayList <Jugador> jugadores;
+public class Partida {
     
+    private ArrayList<Jugador> jugadores;
+    private int turnoJugador;
+
+    public Partida(ArrayList<Jugador> jugadores) {
+        this.jugadores = jugadores;
+    }
+
+    public ArrayList<Jugador> getJugadores() {
+        return jugadores;
+    }
+
+    public int getTurnoJugador() {
+        return turnoJugador;
+    }
+
+    public void siguienteTurno(){
+        this.turnoJugador++;
+        if(this.turnoJugador >= this.jugadores.size()){
+            this.turnoJugador = 0;
+        }
+    }
 }

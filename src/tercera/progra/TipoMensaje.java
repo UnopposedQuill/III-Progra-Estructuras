@@ -12,7 +12,7 @@ import java.io.Serializable;
  * @author Esteban
  */
 public enum TipoMensaje implements Serializable{
-    atacarJugador, actualizarTablas, enviarMensaje, unirseACola, activado, notificarJugadores;
+    atacarJugador, actualizarTablas, enviarMensaje, unirseACola, activado, notificarJugadores, intercambio;
     
     public String getRepString(){
         switch(this){
