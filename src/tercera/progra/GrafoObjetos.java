@@ -6,6 +6,7 @@
 package tercera.progra;
 
 import Gui.TipoFabrica;
+import java.util.*;
 
 /**
  *
@@ -16,6 +17,8 @@ public class GrafoObjetos {
     private Object[] vertices;
     private int[][] matrizAdyacencia;
     private boolean[] visitados;
+    private ArrayList<Coordenada> danhos;
+    
     /**
      * 
      * @param cantidadVertices
@@ -33,6 +36,20 @@ public class GrafoObjetos {
                 matrizAdyacencia[i][j] = 0;
             }
         }
+        this.danhos = new ArrayList<>();
+    }
+
+    public ArrayList<Coordenada> getDanhos() {
+        return danhos;
+    }
+    
+    /**
+     * Este método agrega nuevos daños a la lista de daños
+     * @param coordenadaDelDanho La coordenada donde está el daño
+     * @return True si se insertó correctamente, False en el otro csao
+     */
+    public boolean agregarDanhos(Coordenada coordenadaDelDanho){
+        return this.danhos.add(coordenadaDelDanho);
     }
     
     public boolean agregarNuevoVertice (Elemento nuevoVertice){

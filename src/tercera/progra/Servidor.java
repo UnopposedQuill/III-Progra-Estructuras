@@ -20,9 +20,7 @@ public class Servidor extends Thread{
     private boolean activo;
     private boolean pausado;
     private ArrayList<Partida> partidasEnCurso;
-    private ArrayList<Jugador> jugadoresEsperaDuo;
-    private ArrayList<Jugador> jugadoresEsperaTrio;
-    private ArrayList<Jugador> jugadoresEsperaCuarteto;
+    private ArrayList<Jugador> jugadoresEsperaDuo,jugadoresEsperaTrio,jugadoresEsperaCuarteto;
     
     //Campos de las conexiones del servidor
     private ServerSocket serverSocket;
@@ -165,13 +163,103 @@ public class Servidor extends Thread{
      * @param mensajeAAtender El mensaje recibido que se desea atender
      */
     private void atenderPeticion(Mensaje mensajeAAtender){
-        switch(mensajeAAtender.getTipoDelMensaje()){
-            case actualizarTablas:{
-                System.out.println("Se desea actualizar las tablas de cada jugador");
-                mensajeAAtender.setDatoDeRespuesta(this.partidasEnCurso);
-                this.enviarMensaje(mensajeAAtender);
+        try{
+            switch(mensajeAAtender.getTipoDelMensaje()){
+                case actualizarTablas:{
+                    System.out.println("Se desea actualizar las tablas de cada jugador");
+                    mensajeAAtender.setDatoDeRespuesta(this.partidasEnCurso);
+                    this.enviarMensaje(mensajeAAtender);
+                    break;
+                }
+                case activado:{
+                    System.out.println("Se desea averiguar si el servidor está activo");
+                    mensajeAAtender.setDatoDeRespuesta(true);
+                    this.enviarMensaje(mensajeAAtender);
+                    break;
+                }
+                case atacarJugador:{
+                    System.out.println("Se desea agregar un daño a un jugador");
+                    Ataque ataque = (Ataque)mensajeAAtender.getDatoDeSolicitud();
+                    Partida partidaAModificar = this.encontrarPartidaDelJugador(ataque.getBlancoDelAtaque());
+                    System.out.println("Se consiguieron correctamente los datos del ataque");
+                    boolean resultado = partidaAModificar.getJugadores().get(partidaAModificar.getJugadores().indexOf(ataque.getBlancoDelAtaque())).getGrafoPropio().agregarDanhos(ataque.getCoordenadaDeAtaque());
+                    if(resultado){
+                        System.out.println("Se agregaron los daños correctamente");
+                    }
+                    else{
+                        System.out.println("No se agregaron correctamente los daños");
+                    }
+                    mensajeAAtender.setDatoDeRespuesta(resultado);
+                    enviarMensaje(mensajeAAtender);
+                    break;
+                }
+                case unirseACola:{
+                    Jugador posibleNuevoJugador = (Jugador)mensajeAAtender.getDatoDeSolicitud();
+                    if(this.encontrarPartidaDelJugador(posibleNuevoJugador) == null){//primero verifico si no estaba en otra partida
+                        switch((int)mensajeAAtender.getDatoDeSolicitud()){
+                            case 2:{
+                                this.jugadoresEsperaDuo.add(posibleNuevoJugador);
+                                if(this.jugadoresEsperaDuo.size() >= 2){
+                                    
+                                }
+                                break;
+                            }
+                            case 3:{
+                                this.jugadoresEsperaTrio.add(posibleNuevoJugador);
+                                if(this.jugadoresEsperaTrio.size() >= 3){
+                                    
+                                }
+                                break;
+                            }
+                            case 4:{
+                                this.jugadoresEsperaCuarteto.add(posibleNuevoJugador);
+                                if(this.jugadoresEsperaCuarteto.size() >= 4){
+                                    
+                                }
+                                break;
+                            }
+                        }
+                        mensajeAAtender.setDatoDeRespuesta(true);
+                    }
+                    else{
+                        mensajeAAtender.setDatoDeRespuesta(false);
+                    }
+                    enviarMensaje(mensajeAAtender);
+                }    
+            }
+        }catch(ClassCastException exc){
+            System.out.println("Ocurrió un error a la hora de descifrar alguno de los datos en una solicitud del tipo: " + mensajeAAtender.getTipoDelMensaje().getRepString());
+        }
+    }
+    
+    /**
+     * Este método se encarga de emparejar los jugadores en partidas
+     * @param tipoEmparejamiento El tamaño de la partida
+     * @return Si se logró agregar la partida
+     */
+    private boolean emparejar(int tipoEmparejamiento){
+        ArrayList <Jugador> jugadoresAEmparejar = new ArrayList();
+        switch(tipoEmparejamiento){
+            case 2:{
+                for (int i = 0; i < tipoEmparejamiento; i++) {
+                    jugadoresAEmparejar.add(this.jugadoresEsperaDuo.remove(0));
+                }
+                break;
+            }
+            case 3:{
+                for (int i = 0; i < tipoEmparejamiento; i++) {
+                    jugadoresAEmparejar.add(this.jugadoresEsperaTrio.remove(0));
+                }
+                break;
+            }
+            case 4:{
+                for (int i = 0; i < tipoEmparejamiento; i++) {
+                    jugadoresAEmparejar.add(this.jugadoresEsperaCuarteto.remove(0));
+                }
+                break;
             }
         }
+        return this.partidasEnCurso.add(new Partida(jugadoresAEmparejar));
     }
     
     /**
@@ -193,6 +281,10 @@ public class Servidor extends Thread{
         return null;
     }
     
+    /**
+     * Este es el método encargado de enviar un mensaje a alguno de los jugadores
+     * @param mensajeAEnviar El mensaje que se desea enviar
+     */
     private void enviarMensaje(Mensaje mensajeAEnviar){
         try {
             this.flujoDeSalida.writeObject(mensajeAEnviar);

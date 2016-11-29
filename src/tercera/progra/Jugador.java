@@ -14,7 +14,7 @@ import java.util.*;
  */
 public class Jugador {
     
-    private String nombreJugador;
+    private final String nombreJugador;
     private OutputStream conexionSalida;
     private ObjectOutputStream flujoDeSalida;
     private InputStream conexionEntrada;
@@ -23,7 +23,77 @@ public class Jugador {
     private int dineroJugador;
     private int aceroJugador;
     private ArrayList<Arma> armasJugador;
+    private int numeroJugador;
 
+    public Jugador(String nombreJugador, GrafoObjetos grafoPropio) {
+        this.nombreJugador = nombreJugador;
+        this.grafoPropio = grafoPropio;
+        this.aceroJugador = 0;
+        this.armasJugador = new ArrayList<>();
+        this.dineroJugador = 4000;
+        this.numeroJugador = -1;
+    }
+
+    public GrafoObjetos getGrafoPropio() {
+        return grafoPropio;
+    }
+
+    public void setGrafoPropio(GrafoObjetos grafoPropio) {
+        this.grafoPropio = grafoPropio;
+    }
+
+    public int getDineroJugador() {
+        return dineroJugador;
+    }
+
+    public void setDineroJugador(int dineroJugador) {
+        this.dineroJugador = dineroJugador;
+    }
+
+    public int getAceroJugador() {
+        return aceroJugador;
+    }
+
+    public void setAceroJugador(int aceroJugador) {
+        this.aceroJugador = aceroJugador;
+    }
+
+    public String getNombreJugador() {
+        return nombreJugador;
+    }
+
+    public OutputStream getConexionSalida() {
+        return conexionSalida;
+    }
+
+    public ObjectOutputStream getFlujoDeSalida() {
+        return flujoDeSalida;
+    }
+
+    public InputStream getConexionEntrada() {
+        return conexionEntrada;
+    }
+
+    public ObjectInputStream getFlujoDeEntrada() {
+        return flujoDeEntrada;
+    }
+
+    public ArrayList<Arma> getArmasJugador() {
+        return armasJugador;
+    }
+
+    public boolean agregarArma(Arma armaAAgregar){
+        return this.armasJugador.add(armaAAgregar);
+    }
+    
+    public int getNumeroJugador() {
+        return numeroJugador;
+    }
+
+    public void setNumeroJugador(int numeroJugador) {
+        this.numeroJugador = numeroJugador;
+    }
+    
     @Override
     public int hashCode() {
         int hash = 7;
@@ -48,4 +118,6 @@ public class Jugador {
         }
         return true;
     }
+    
+    
 }
