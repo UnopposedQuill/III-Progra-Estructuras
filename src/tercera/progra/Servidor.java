@@ -436,7 +436,7 @@ public class Servidor extends Thread{
         for (int i = 0; i < partidaANotificar.getJugadores().size(); i++) {
             Jugador get = partidaANotificar.getJugadores().get(i);
             try {
-                OutputStream conexionSalidaSocket = new Socket(get.getIP(),5001).getOutputStream();
+                OutputStream conexionSalidaSocket = new Socket(get.getIP(),5000).getOutputStream();
                 ObjectOutputStream canalEscritura = new ObjectOutputStream(conexionSalidaSocket);
                 canalEscritura.writeObject(new Mensaje(TipoMensaje.notificarJugadores, null));
                 System.out.println("Mensaje enviado de vuelta correctamente");

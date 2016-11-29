@@ -64,51 +64,16 @@ public class JFrameGuerraMundos extends JFrame implements java.io.Serializable{
         
         //aquí irán los datos que serán dibujados en la tabla
         Object[][] datos = new Object[15][15];
-        //por ahora sólo tengo estas burdas imágenes
-        // crea imagen blanco
-        ImageIcon iconoVacio = new ImageIcon(getClass().getResource("cvacio.GIF"));
-        // crea imagen X
-        ImageIcon iconoEquiz = new ImageIcon(getClass().getResource("cequiz.GIF"));
-        // crea la imagen circulo
-        ImageIcon iconoCirculo = new ImageIcon(getClass().getResource("ccirculo.GIF"));
-        //ahora toca llenar la tabla de datos
         for (int i = 0; i < 15; i++) {
             for (int j = 0; j < 15; j++) {
                 Object objetoGuia = datosGuia[i][j];
                 if(objetoGuia instanceof TipoFabrica){//este es un if de validación, sino, revienta todo
                     //ahora creo el botón a renderizar
                     JButton botonARenderizar = new JButton("");
-                    //esto es un switch de todos los tipos de cosas que debemos dibujar
-                    switch((TipoFabrica)objetoGuia){
-                        case AGUJERO:{//agujero negro...
-                            //le seteo la imagen al botón
-                            botonARenderizar.setIcon(iconoEquiz);
-                            //lo ingreso en la tabla
-                            datos[i][j] = botonARenderizar;
-                            break;
-                        }
-                        case BLANK:{
-                            //le seteo la imagen al botón
-                            botonARenderizar.setIcon(iconoVacio);
-                            //lo ingreso en la tabla
-                            datos[i][j] = botonARenderizar;
-                            break;
-                        }
-                        case MINAH1:{
-                            //le seteo la imagen al botón
-                            botonARenderizar.setIcon(iconoCirculo);
-                            //lo ingreso en la tabla
-                            datos[i][j] = botonARenderizar;
-                            break;
-                        }
-                        default:{//como no tengo más imágenes, entonces pongo el default
-                            //a estos en lugar de imagen les pongo de texto lo que eran
-                            botonARenderizar.setText(TipoFabrica.fakeToString((TipoFabrica)objetoGuia));
-                            //lo ingreso en la tabla
-                            datos[i][j] = botonARenderizar;
-                            break;
-                        }
-                    }
+                    //le seteo la imagen al botón
+                    botonARenderizar.setIcon(new ImageIcon(getClass().getResource((TipoFabrica.fakeToString((TipoFabrica)objetoGuia)))));
+                    //lo ingreso en la tabla
+                    datos[i][j] = botonARenderizar;
                 }//si no calza en tipo fabrica, entonces se retorna y se lava las manos
                 else{
                     datos[i][j] = new JButton("Desconocido");
