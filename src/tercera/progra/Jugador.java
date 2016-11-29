@@ -7,12 +7,15 @@ package tercera.progra;
 
 import java.io.*;
 import java.util.*;
+import java.net.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Esta es la estructura que controlará los grafos, así como todas las acciones del juego
  * @author esteban
  */
-public class Jugador {
+public class Jugador extends Thread{
     
     private final String nombreJugador;
     private OutputStream conexionSalida;
@@ -24,14 +27,17 @@ public class Jugador {
     private int aceroJugador;
     private ArrayList<Arma> armasJugador;
     private int numeroJugador;
+    private String huesped = "localhost";
+    private int puerto = 5000;
 
-    public Jugador(String nombreJugador, GrafoObjetos grafoPropio) {
+    public Jugador(String nombreJugador, GrafoObjetos grafoPropio, String huesped) {
         this.nombreJugador = nombreJugador;
         this.grafoPropio = grafoPropio;
         this.aceroJugador = 0;
         this.armasJugador = new ArrayList<>();
         this.dineroJugador = 4000;
         this.numeroJugador = -1;
+        this.huesped = huesped;
     }
 
     public GrafoObjetos getGrafoPropio() {
@@ -93,6 +99,10 @@ public class Jugador {
     public void setNumeroJugador(int numeroJugador) {
         this.numeroJugador = numeroJugador;
     }
+
+    public String getHuesped() {
+        return huesped;
+    }
     
     @Override
     public int hashCode() {
@@ -118,6 +128,54 @@ public class Jugador {
         }
         return true;
     }
+
+    /**
+     * El run del hilo va a ser el que actualiza qué ha recibido el Jugador
+     */
+    @Override
+    public void run() {
+        while(true){
+            try {
+                Mensaje mensajeRecibido = (Mensaje)this.flujoDeEntrada.readObject();
+                switch(mensajeRecibido.getTipoDelMensaje()){
+                    case notificarJugadores:{//el servidor acaba de notificar cambios
+                        //tiene que actualizarse todo
+                        
+                    }
+                    case emparejado:{
+                        //se acaba de avisar que se emparejó con otros jugadores
+                    }
+                }
+            } catch (IOException | ClassNotFoundException ex) {
+                System.out.println("No se captó nada");
+            }
+        }
+    }
     
-    
+    public Mensaje realizarPeticion(Mensaje aEnviar){
+        for (int i = 0; i < 3; i++) {
+            try{
+                System.out.println("Conectándose al servidor especificado");
+                Socket socketConexion = new Socket(this.huesped, this.puerto);
+                System.out.println("Estableciendo conexiones con el servidor");
+                this.conexionEntrada = socketConexion.getInputStream();
+                this.flujoDeEntrada = new ObjectInputStream(this.conexionEntrada);
+                this.conexionSalida = socketConexion.getOutputStream();
+                this.flujoDeSalida = new ObjectOutputStream(this.conexionSalida);
+                System.out.println("Enviando mensaje");
+                this.flujoDeSalida.writeObject(aEnviar);
+                try{
+                    System.out.println("Mensaje recibido con éxito");
+                    return (Mensaje) this.flujoDeEntrada.readObject();
+                }catch(ClassNotFoundException | ClassCastException exc){
+                    System.out.println("Ocurrió un error a la hora de averiguar el mensaje retornado");
+                    return null;
+                }
+            }catch(IOException exc){
+                System.out.println("Algo salió mal al intentar conectarse al servidor: " + this.huesped + " " + this.puerto);
+            }
+        }
+        System.out.println("Se rindió al no poder conectarse al servidor");
+        return null;
+    }
 }

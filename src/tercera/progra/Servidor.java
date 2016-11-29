@@ -21,6 +21,7 @@ public class Servidor extends Thread{
     private boolean pausado;
     private ArrayList<Partida> partidasEnCurso;
     private ArrayList<Jugador> jugadoresEsperaDuo,jugadoresEsperaTrio,jugadoresEsperaCuarteto;
+    private String logs;
     
     //Campos de las conexiones del servidor
     private ServerSocket serverSocket;
@@ -39,6 +40,7 @@ public class Servidor extends Thread{
         this.jugadoresEsperaDuo = new ArrayList<>();
         this.jugadoresEsperaTrio = new ArrayList<>();
         this.jugadoresEsperaCuarteto = new ArrayList<>();
+        this.logs = "";
     }
     
     /**
@@ -113,6 +115,28 @@ public class Servidor extends Thread{
     public boolean isPausado() {
         return pausado;
     }
+
+    public ArrayList<Partida> getPartidasEnCurso() {
+        return partidasEnCurso;
+    }
+
+    public ArrayList<Jugador> getJugadoresEsperaDuo() {
+        return jugadoresEsperaDuo;
+    }
+
+    public ArrayList<Jugador> getJugadoresEsperaTrio() {
+        return jugadoresEsperaTrio;
+    }
+
+    public ArrayList<Jugador> getJugadoresEsperaCuarteto() {
+        return jugadoresEsperaCuarteto;
+    }
+
+    public String getLogs() {
+        return logs;
+    }
+    
+    
     
     /**
      * Este método es el método que controla el servidor, lo que hace este método es que controla todas las nuevas conexiones
@@ -139,7 +163,7 @@ public class Servidor extends Thread{
                 try{
                     Mensaje mensajeRecibido = (Mensaje)flujoDeEntrada.readObject();//consigo el mensaje enviado (o intento hacerlo)
                     System.out.println("Atendiendo Petición");
-                    atenderPeticion(mensajeRecibido);//hago que el servidor atienda la petición
+                    atenderPeticion(mensajeRecibido, socketNuevo);//hago que el servidor atienda la petición
                 }catch(ClassNotFoundException | ClassCastException excep){
                     System.out.println("Ocurrió un error a la hora de averiguar el mensaje enviado");
                 }
@@ -161,20 +185,21 @@ public class Servidor extends Thread{
     /**
      * Este es el método que se encarga de averiguar qué exactamente traía el mensaje, así como de retornar una respuesta
      * @param mensajeAAtender El mensaje recibido que se desea atender
+     * @param socketPeticion El socket del cual se recibió la conexión
      */
-    private void atenderPeticion(Mensaje mensajeAAtender){
+    private void atenderPeticion(Mensaje mensajeAAtender, Socket socketPeticion){
         try{
             switch(mensajeAAtender.getTipoDelMensaje()){
                 case actualizarTablas:{
                     System.out.println("Se desea actualizar las tablas de cada jugador");
                     mensajeAAtender.setDatoDeRespuesta(this.partidasEnCurso);
-                    this.enviarMensaje(mensajeAAtender);
+                    this.enviarMensaje(mensajeAAtender, this.flujoDeSalida);
                     break;
                 }
                 case activado:{
                     System.out.println("Se desea averiguar si el servidor está activo");
                     mensajeAAtender.setDatoDeRespuesta(true);
-                    this.enviarMensaje(mensajeAAtender);
+                    this.enviarMensaje(mensajeAAtender, this.flujoDeSalida);
                     break;
                 }
                 case atacarJugador:{
@@ -190,11 +215,12 @@ public class Servidor extends Thread{
                         System.out.println("No se agregaron correctamente los daños");
                     }
                     mensajeAAtender.setDatoDeRespuesta(resultado);
-                    enviarMensaje(mensajeAAtender);
+                    this.enviarMensaje(mensajeAAtender, this.flujoDeSalida);
                     break;
                 }
                 case unirseACola:{
                     Jugador posibleNuevoJugador = (Jugador)mensajeAAtender.getDatoDeSolicitud();
+                    
                     if(this.encontrarPartidaDelJugador(posibleNuevoJugador) == null){//primero verifico si no estaba en otra partida
                         switch((int)mensajeAAtender.getDatoDeSolicitud()){
                             case 2:{
@@ -224,7 +250,7 @@ public class Servidor extends Thread{
                     else{
                         mensajeAAtender.setDatoDeRespuesta(false);
                     }
-                    enviarMensaje(mensajeAAtender);
+                    this.enviarMensaje(mensajeAAtender, this.flujoDeSalida);
                 }
             }
         }catch(ClassCastException exc){
@@ -288,12 +314,23 @@ public class Servidor extends Thread{
     }
     
     /**
+     * Este método lo que hace es notificar a los jugadores de una partida que hubo algún cambio
+     * @param partidaANotificar La partida a ser notificada
+     */
+    public void notificarUsuariosPartida(Partida partidaANotificar){
+        for (int i = 0; i < partidaANotificar.getJugadores().size(); i++) {
+            Jugador get = partidaANotificar.getJugadores().get(i);
+            this.enviarMensaje(new Mensaje(TipoMensaje.notificarJugadores, null), get.getFlujoDeSalida());
+        }
+    }
+    
+    /**
      * Este es el método encargado de enviar un mensaje a alguno de los jugadores
      * @param mensajeAEnviar El mensaje que se desea enviar
      */
-    private void enviarMensaje(Mensaje mensajeAEnviar){
+    private void enviarMensaje(Mensaje mensajeAEnviar, ObjectOutputStream canalEscritura){
         try {
-            this.flujoDeSalida.writeObject(mensajeAEnviar);
+            canalEscritura.writeObject(mensajeAEnviar);
             System.out.println("Mensaje enviado de vuelta correctamente");
         } catch (IOException ex) {
             System.out.println("Error al enviar el mensaje de vuelta");
