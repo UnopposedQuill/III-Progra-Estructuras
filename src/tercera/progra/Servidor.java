@@ -200,21 +200,21 @@ public class Servidor extends Thread{
                             case 2:{
                                 this.jugadoresEsperaDuo.add(posibleNuevoJugador);
                                 if(this.jugadoresEsperaDuo.size() >= 2){
-                                    
+                                    emparejar(2);
                                 }
                                 break;
                             }
                             case 3:{
                                 this.jugadoresEsperaTrio.add(posibleNuevoJugador);
                                 if(this.jugadoresEsperaTrio.size() >= 3){
-                                    
+                                    emparejar(3);
                                 }
                                 break;
                             }
                             case 4:{
                                 this.jugadoresEsperaCuarteto.add(posibleNuevoJugador);
                                 if(this.jugadoresEsperaCuarteto.size() >= 4){
-                                    
+                                    emparejar(4);
                                 }
                                 break;
                             }
@@ -225,7 +225,7 @@ public class Servidor extends Thread{
                         mensajeAAtender.setDatoDeRespuesta(false);
                     }
                     enviarMensaje(mensajeAAtender);
-                }    
+                }
             }
         }catch(ClassCastException exc){
             System.out.println("Ocurrió un error a la hora de descifrar alguno de los datos en una solicitud del tipo: " + mensajeAAtender.getTipoDelMensaje().getRepString());
@@ -242,19 +242,25 @@ public class Servidor extends Thread{
         switch(tipoEmparejamiento){
             case 2:{
                 for (int i = 0; i < tipoEmparejamiento; i++) {
-                    jugadoresAEmparejar.add(this.jugadoresEsperaDuo.remove(0));
+                    Jugador jugadorAEmparejar = this.jugadoresEsperaDuo.remove(0);
+                    jugadorAEmparejar.setNumeroJugador(i);
+                    jugadoresAEmparejar.add(jugadorAEmparejar);
                 }
                 break;
             }
             case 3:{
                 for (int i = 0; i < tipoEmparejamiento; i++) {
-                    jugadoresAEmparejar.add(this.jugadoresEsperaTrio.remove(0));
+                    Jugador jugadorAEmparejar = this.jugadoresEsperaTrio.remove(0);
+                    jugadorAEmparejar.setNumeroJugador(i);
+                    jugadoresAEmparejar.add(jugadorAEmparejar);
                 }
                 break;
             }
             case 4:{
                 for (int i = 0; i < tipoEmparejamiento; i++) {
-                    jugadoresAEmparejar.add(this.jugadoresEsperaCuarteto.remove(0));
+                    Jugador jugadorAEmparejar = this.jugadoresEsperaCuarteto.remove(0);
+                    jugadorAEmparejar.setNumeroJugador(i);
+                    jugadoresAEmparejar.add(jugadorAEmparejar);
                 }
                 break;
             }
