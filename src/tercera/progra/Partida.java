@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Fabricas;
+package tercera.progra;
 
 /**
  *
  * @author esteban
  */
-public enum Orientacion {
-    Horizontal,Vertical,NoDefinido;
+class Partida {
+    
 }

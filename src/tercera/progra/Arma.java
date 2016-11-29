@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Fabricas;
+package tercera.progra;
 
 /**
  * Esta es la clase de la arma, donde sólo se tendrán 4 tipos, definidos como enteros, aunque podría
@@ -12,4 +12,8 @@ package Fabricas;
  */
 public class Arma {
     private int tipoArma;
+
+    public Arma(int tipoArma) {
+        this.tipoArma = tipoArma;
+    }
 }

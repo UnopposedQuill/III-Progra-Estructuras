@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Fabricas;
+package tercera.progra;
 
 /**
  * Los elementos serán los tipos de elementos que habrán en el grafo del mundo, estos son abstractos para
@@ -22,9 +22,21 @@ public abstract class Elemento {
      */
     protected int posicionY;
 
+    /**
+     * La identificación del objeto
+     */
+    protected int posicionGrafo;
+    
     public Elemento(int posicionX, int posicionY) {
         this.posicionX = posicionX;
         this.posicionY = posicionY;
+        posicionGrafo = 0;
+    }
+    
+    public Elemento(int posicionX, int posicionY, int identificador) {
+        this.posicionX = posicionX;
+        this.posicionY = posicionY;
+        this.posicionGrafo = identificador;
     }
     
     public int getPosicionX() {
@@ -34,4 +46,14 @@ public abstract class Elemento {
     public int getPosicionY() {
         return posicionY;
     }
+
+    public int getPosicionGrafo() {
+        return posicionGrafo;
+    }
+
+    public void setPosicionGrafo(int posicionGrafo) {
+        this.posicionGrafo = posicionGrafo;
+    }
+    
+    
 }

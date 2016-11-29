@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Fabricas;
+package tercera.progra;
 
 /**
  * Esta es la subclase de elemento donde la orientación importa, como las minas, armerías, templo y mercado
@@ -17,4 +17,10 @@ public abstract class Fabrica extends Elemento{
         super(posicionX, posicionY);
         this.orientacionFabrica = orientacionFabrica;
     }
+
+    public Orientacion getOrientacionFabrica() {
+        return orientacionFabrica;
+    }
+    
+    
 }
