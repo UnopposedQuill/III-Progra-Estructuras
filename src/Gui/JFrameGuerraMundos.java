@@ -5,19 +5,11 @@
  */
 package Gui;
 
-import java.awt.Component;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.*;
+import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
-import tercera.progra.AgujeroNegro;
-import tercera.progra.Armeria;
-import tercera.progra.Conector;
-import tercera.progra.GrafoObjetos;
-import tercera.progra.Mina;
-import tercera.progra.Orientacion;
-import tercera.progra.Templo;
+import javax.swing.table.*;
+import tercera.progra.*;
 
 /**
  *
@@ -67,40 +59,7 @@ public class JFrameGuerraMundos extends JFrame {
         
         this.dibujarTablero(grafo.generarMatriz());
     }
-    
-    //----------------------------------
-    //----------------------------------
-    
-    int componenteColocar = 0;
-    int dineroJugador = 4000;
-    int turnoJugador=1;
-    //numero de jugador 1 a 4
-    int numeroJugador = 0;
-    int mundoInicial = 1;
-    int mercadoInicial = 1;
-    int orientacionColocarFabrica = 0;
-    boolean atacandoEnemigo1 = false;
-    boolean atacandoEnemigo2 = false;
-    boolean atacandoEnemigo3 = false;
-    /*
-    // cambiar este valor para dimensiones
-    public static int DIMENSIONES = 15;
-    // Tablero con objetos JButton
-    JButton[][] tableroLabels = new JButton[DIMENSIONES][DIMENSIONES];
-    // tablero logico, indica el status del boton, si disparado o no
-    int[][] tableroLogico = new int[DIMENSIONES][DIMENSIONES];
-    
-    int[][] tableroEnemigo1 = new int[DIMENSIONES][DIMENSIONES];
-    int[][] tableroEnemigo2 = new int[DIMENSIONES][DIMENSIONES];
-    int[][] tableroEnemigo3 = new int[DIMENSIONES][DIMENSIONES];
-    // crea imagen blanco
-    ImageIcon iconoVacio = new ImageIcon(getClass().getResource("cvacio.GIF"));
-    // crea imagen X
-    ImageIcon iconoEquiz = new ImageIcon(getClass().getResource("cequiz.GIF"));
-    // crea la imagen circulo
-    ImageIcon iconoCirculo = new ImageIcon(getClass().getResource("ccirculo.GIF"));
-    
-    */
+
     private void dibujarTablero(Object[][] datosGuia){
         
         

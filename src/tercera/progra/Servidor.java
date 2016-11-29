@@ -164,17 +164,22 @@ public class Servidor extends Thread{
      * Este es el método que se encarga de averiguar qué exactamente traía el mensaje, así como de retornar una respuesta
      * @param mensajeAAtender El mensaje recibido que se desea atender
      */
-    public void atenderPeticion(Mensaje mensajeAAtender){
+    private void atenderPeticion(Mensaje mensajeAAtender){
         switch(mensajeAAtender.getTipoDelMensaje()){
-            
+            case actualizarTablas:{
+                System.out.println("Se desea actualizar las tablas");
+            }
         }
     }
     
-
-    
-    
-    
-   
+    private void enviarMensaje(Mensaje mensajeAEnviar){
+        try {
+            this.flujoDeSalida.writeObject(mensajeAEnviar);
+            System.out.println("Mensaje enviado de vuelta correctamente");
+        } catch (IOException ex) {
+            System.out.println("Error al enviar el mensaje de vuelta");
+        }
+    }
     
     @Override
     public String toString() {

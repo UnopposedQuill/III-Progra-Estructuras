@@ -5,10 +5,14 @@
  */
 package tercera.progra;
 
+import java.util.*;
+
 /**
  *
  * @author esteban
  */
 class Partida {
+    private int turnoJugador;
+    private ArrayList <Jugador> jugadores;
     
 }
