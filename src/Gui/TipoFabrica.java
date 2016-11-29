@@ -12,81 +12,96 @@ package Gui;
  */
 public enum TipoFabrica {
     
-    AGUJERO,ARMERIAH1,ARMERIAH2,ARMERIAV1,ARMERIAV2,CONECTOR,CONECTOR2,CONECTOR3,MINAH1,MINAH2,MINAV1,MINAV2,MUNDO1,MUNDO2,MUNDO3,MUNDO4,TEMPLOH1,TEMPLOH2,TEMPLOV1,TEMPLOV2,BLANK,INCENDIADO,MERCADOH1,MERCADOH2,MERCADOV1,MERCADOV2;
+    AGUJERO,ARMERIAH1,ARMERIAH2,ARMERIAV1,ARMERIAV2,CONECTOR,CONECTOR2,CONECTOR3,MINAH1,MINAH2,MINAV1,MINAV2,MUNDO1,MUNDO2,MUNDO3,MUNDO4,TEMPLOH1,TEMPLOH2,TEMPLOV1,TEMPLOV2,BLANK,EXPLOSION1,EXPLOSION2,EXPLOSION3,MERCADOH1,MERCADOH2,MERCADOV1,MERCADOV2,DISPARADO;
 
     public static String fakeToString(TipoFabrica tipo) {
         switch(tipo){
             case AGUJERO:{
-                return "Agujero Negro";
+                return "agujeroNegro.jpg";
             }
             case ARMERIAH1:{
-                return "Armería Horizontal 1";
+                return "armeriaH1.png";
             }
             case ARMERIAH2:{
-                return "Armería Horizontal 2";
+                return "armeriaH2.png";
             }
             case ARMERIAV1:{
-                return "Armería Vertical 1";
+                return "armeriaV1.png";
             }
             case ARMERIAV2:{
-                return "Armería Vertical 2";
+                return "armeriaV2.jpg";
             }
             case CONECTOR:{
-                return "Conector";
+                return "conector.jpg";
+            }
+            case CONECTOR2:{
+                return "conector2.jpg";
+            }
+            case CONECTOR3:{
+                return "conector3.jpg";
             }
             case MINAH1:{
-                return "Mina Horizontal 1";
+                return "minaH1.jpg";
             }
             case MINAH2:{
-                return "Mina Horizontal 2";
+                return "minaH2.jpg";
             }
             case MINAV1:{
-                return "Mina Vertical 1";
+                return "minaV1.jpg";
             }
             case MINAV2:{
-                return "Mina Vertical 2";
+                return "minaV2.jpg";
             }
             case MUNDO1:{
-                return "Mundo Superior Izquierda";
+                return "tierra1.jpg";
             }
             case MUNDO2:{
-                return "Mundo Superior Derecha";
+                return "tierra2.jpg";
             }
             case MUNDO3:{
-                return "Mundo Inferior Izquierda";
+                return "tierra3.jpg";
             }
             case MUNDO4:{
-                return "Mundo Inferior Derecha";
+                return "tierra4.jpg";
             }
             case TEMPLOH1:{
-                return "Templo Horizontal 1";
+                return "temploH1.jpg";
             }
             case TEMPLOH2:{
-                return "Templo Horizontal 2";
+                return "temploH2.jpg";
             }
             case TEMPLOV1:{
-                return "Templo Vertical 1";
+                return "temploV1.jpg";
             }
             case TEMPLOV2:{
-                return "Templo Vertical 2";
+                return "temploV2.jpg";
             }
-            case INCENDIADO:{
-                return "Incendiado";
+            case EXPLOSION1:{
+                return "explosion1.jpg";
+            }
+            case EXPLOSION2:{
+                return "explosion2.png";
+            }
+            case EXPLOSION3:{
+                return "explosion3.png";
             }
             case MERCADOH1:{
-                return "Mercado Horizontal 1";
+                return "mercadoH1.jpg";
             }
             case MERCADOH2:{
-                return "Mercado Horizontal 2";
+                return "mercadoH2.jpg";
             }
             case MERCADOV1:{
-                return "Mercado Vertical 1";
+                return "mercadoV1.jpg";
             }
             case MERCADOV2:{
-                return "Mercado Vertical 2";
+                return "mercadoV2.jpg";
+            }
+            case DISPARADO:{
+                return "target.png";
             }
             default:{
-                return "Blank";
+                return "cvacio.GIF";
             }
         }
     }

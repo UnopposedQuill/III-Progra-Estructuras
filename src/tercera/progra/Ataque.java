@@ -5,20 +5,22 @@
  */
 package tercera.progra;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author esteban
  */
 public class Ataque {
-    private final Coordenada coordenadaDeAtaque;
+    private final ArrayList<Coordenada> coordenadaDeAtaque;
     private final Jugador blancoDelAtaque;
 
-    public Ataque(Coordenada coordenadaDeAtaque, Jugador blancoDelAtaque) {
+    public Ataque(ArrayList<Coordenada> coordenadaDeAtaque, Jugador blancoDelAtaque) {
         this.coordenadaDeAtaque = coordenadaDeAtaque;
         this.blancoDelAtaque = blancoDelAtaque;
     }
 
-    public Coordenada getCoordenadaDeAtaque() {
+    public ArrayList<Coordenada> getCoordenadaDeAtaque() {
         return coordenadaDeAtaque;
     }
 

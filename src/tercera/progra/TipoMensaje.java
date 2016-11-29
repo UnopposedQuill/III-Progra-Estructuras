@@ -13,7 +13,7 @@ import java.io.Serializable;
  */
 public enum TipoMensaje implements Serializable{
     atacarJugador, actualizarTablas, enviarMensaje, unirseACola, activado,
-    notificarJugadores, intercambio, nuevaFabrica, nuevaArma, emparejado;
+    notificarJugadores, intercambio, nuevoElemento, nuevaArma, emparejado;
     
     public String getRepString(){
         switch(this){
@@ -41,8 +41,8 @@ public enum TipoMensaje implements Serializable{
             case nuevaArma:{
                 return "Nueva Arma";
             }
-            case nuevaFabrica:{
-                return "Nueva Fábrica";
+            case nuevoElemento:{
+                return "Nuevo Elemento";
             }
             case emparejado:{
                 return "Emparejado";

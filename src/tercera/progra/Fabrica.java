@@ -13,13 +13,24 @@ public abstract class Fabrica extends Elemento{
     
     protected Orientacion orientacionFabrica;
 
+    protected Coordenada coordenadaExtra;
+    
     public Fabrica(Orientacion orientacionFabrica, int posicionX, int posicionY) {
         super(posicionX, posicionY);
         this.orientacionFabrica = orientacionFabrica;
+        
+        if (orientacionFabrica == Orientacion.Horizontal)
+            coordenadaExtra = new Coordenada(posicionX+1, posicionY);
+        else
+            coordenadaExtra = new Coordenada(posicionX, posicionY+1);
     }
 
     public Orientacion getOrientacionFabrica() {
         return orientacionFabrica;
+    }
+
+    public Coordenada getCoordenadaExtra() {
+        return coordenadaExtra;
     }
     
     

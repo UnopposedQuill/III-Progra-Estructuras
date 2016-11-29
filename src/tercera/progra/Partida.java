@@ -11,7 +11,7 @@ import java.util.*;
  *
  * @author esteban
  */
-public class Partida {
+public class Partida implements java.io.Serializable{
     
     private ArrayList<Jugador> jugadores;
     private int turnoJugador;

@@ -5,39 +5,54 @@
  */
 package tercera.progra;
 
+import Gui.JFrameGuerraMundos;
 import java.io.*;
 import java.util.*;
 import java.net.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFrame;
 
 /**
  * Esta es la estructura que controlará los grafos, así como todas las acciones del juego
  * @author esteban
  */
-public class Jugador extends Thread{
+public class Jugador extends Thread implements Serializable{
     
     private final String nombreJugador;
+    /*
     private OutputStream conexionSalida;
     private ObjectOutputStream flujoDeSalida;
     private InputStream conexionEntrada;
     private ObjectInputStream flujoDeEntrada;
+    */
+    private String IP;
     private GrafoObjetos grafoPropio;
     private int dineroJugador;
     private int aceroJugador;
-    private ArrayList<Arma> armasJugador;
     private int numeroJugador;
     private String huesped = "localhost";
-    private int puerto = 5000;
+    private final int puerto = 5000;
+    private final ArrayList<Arma> armasJugador = new ArrayList<>();
+    private JFrameGuerraMundos ventanaPropia;
 
+    public Jugador(String nombreJugador) {
+        this.nombreJugador = nombreJugador;
+        this.IP = null;
+    }
+    
     public Jugador(String nombreJugador, GrafoObjetos grafoPropio, String huesped) {
         this.nombreJugador = nombreJugador;
         this.grafoPropio = grafoPropio;
         this.aceroJugador = 0;
-        this.armasJugador = new ArrayList<>();
         this.dineroJugador = 4000;
         this.numeroJugador = -1;
         this.huesped = huesped;
+        try { 
+            this.IP = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(Jugador.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public GrafoObjetos getGrafoPropio() {
@@ -68,6 +83,7 @@ public class Jugador extends Thread{
         return nombreJugador;
     }
 
+    /*
     public OutputStream getConexionSalida() {
         return conexionSalida;
     }
@@ -83,6 +99,7 @@ public class Jugador extends Thread{
     public ObjectInputStream getFlujoDeEntrada() {
         return flujoDeEntrada;
     }
+    */
 
     public ArrayList<Arma> getArmasJugador() {
         return armasJugador;
@@ -102,6 +119,10 @@ public class Jugador extends Thread{
 
     public String getHuesped() {
         return huesped;
+    }
+
+    public String getIP() {
+        return IP;
     }
     
     @Override
@@ -123,10 +144,7 @@ public class Jugador extends Thread{
             return false;
         }
         final Jugador other = (Jugador) obj;
-        if (!Objects.equals(this.nombreJugador, other.nombreJugador)) {
-            return false;
-        }
-        return true;
+        return !Objects.equals(this.IP, other.IP);
     }
 
     /**
@@ -136,14 +154,23 @@ public class Jugador extends Thread{
     public void run() {
         while(true){
             try {
-                Mensaje mensajeRecibido = (Mensaje)this.flujoDeEntrada.readObject();
+                ServerSocket serverSocketActualizaciones = new ServerSocket(5001);
+                
+                Socket recibirDatos = serverSocketActualizaciones.accept();//recibo datos
+                InputStream conexionEntrada = recibirDatos.getInputStream();
+                ObjectInputStream flujoDeEntrada = new ObjectInputStream(conexionEntrada);
+                
+                Mensaje mensajeRecibido = (Mensaje)flujoDeEntrada.readObject();
                 switch(mensajeRecibido.getTipoDelMensaje()){
                     case notificarJugadores:{//el servidor acaba de notificar cambios
                         //tiene que actualizarse todo
-                        
+                        this.realizarPeticion(new Mensaje(TipoMensaje.actualizarTablas, null));
                     }
-                    case emparejado:{
-                        //se acaba de avisar que se emparejó con otros jugadores
+                    case intercambio:{
+                        this.ventanaPropia.actualizarTablero(this.realizarPeticion(new Mensaje(TipoMensaje.actualizarTablas, this)));
+                    }
+                    case enviarMensaje:{
+                        this.ventanaPropia.mostrarMensajeEnChat((String)mensajeRecibido.getDatoDeSolicitud());
                     }
                 }
             } catch (IOException | ClassNotFoundException ex) {
@@ -158,20 +185,21 @@ public class Jugador extends Thread{
                 System.out.println("Conectándose al servidor especificado");
                 Socket socketConexion = new Socket(this.huesped, this.puerto);
                 System.out.println("Estableciendo conexiones con el servidor");
-                this.conexionEntrada = socketConexion.getInputStream();
-                this.flujoDeEntrada = new ObjectInputStream(this.conexionEntrada);
-                this.conexionSalida = socketConexion.getOutputStream();
-                this.flujoDeSalida = new ObjectOutputStream(this.conexionSalida);
+                InputStream conexionEntrada = socketConexion.getInputStream();
+                ObjectInputStream flujoDeEntrada = new ObjectInputStream(conexionEntrada);
+                OutputStream conexionSalida = socketConexion.getOutputStream();
+                ObjectOutputStream flujoDeSalida = new ObjectOutputStream(conexionSalida);
                 System.out.println("Enviando mensaje");
-                this.flujoDeSalida.writeObject(aEnviar);
+                flujoDeSalida.writeObject(aEnviar);
                 try{
-                    System.out.println("Mensaje recibido con éxito");
-                    return (Mensaje) this.flujoDeEntrada.readObject();
+                    System.out.println("Recibiendo Mensaje");
+                    return (Mensaje) flujoDeEntrada.readObject();
                 }catch(ClassNotFoundException | ClassCastException exc){
                     System.out.println("Ocurrió un error a la hora de averiguar el mensaje retornado");
                     return null;
                 }
             }catch(IOException exc){
+                Logger.getLogger(Jugador.class.getName()).log(Level.SEVERE, null, exc);
                 System.out.println("Algo salió mal al intentar conectarse al servidor: " + this.huesped + " " + this.puerto);
             }
         }

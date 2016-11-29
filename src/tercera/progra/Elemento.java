@@ -23,20 +23,23 @@ public abstract class Elemento {
     protected int posicionY;
 
     /**
-     * La identificación del objeto
+     * La posicion del objeto en el grafo
      */
     protected int posicionGrafo;
+    
+    protected Coordenada coordenadas;
     
     public Elemento(int posicionX, int posicionY) {
         this.posicionX = posicionX;
         this.posicionY = posicionY;
         posicionGrafo = 0;
+        coordenadas = new Coordenada(posicionX, posicionY);
     }
     
-    public Elemento(int posicionX, int posicionY, int identificador) {
+    public Elemento(int posicionX, int posicionY, int posicionGrafo) {
         this.posicionX = posicionX;
         this.posicionY = posicionY;
-        this.posicionGrafo = identificador;
+        this.posicionGrafo = posicionGrafo;
     }
     
     public int getPosicionX() {
@@ -53,6 +56,10 @@ public abstract class Elemento {
 
     public void setPosicionGrafo(int posicionGrafo) {
         this.posicionGrafo = posicionGrafo;
+    }
+
+    public Coordenada getCoordenadas() {
+        return coordenadas;
     }
     
     

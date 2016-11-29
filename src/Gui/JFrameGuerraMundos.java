@@ -7,6 +7,7 @@ package Gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.table.*;
 import tercera.progra.*;
@@ -15,34 +16,31 @@ import tercera.progra.*;
  *
  * @author Esteban
  */
-public class JFrameGuerraMundos extends JFrame {
+public class JFrameGuerraMundos extends JFrame implements java.io.Serializable{
 
+    private Jugador jugadorPropio;
+    private ArrayList<Jugador> enemigos;
+    private int tableroActual;
     
     /**
      * Creates new form JFrameGuerraMundos
      */
     public JFrameGuerraMundos() {
-
-        // esto es parte del gato
         initComponents();
-        /*
-        generarTablero();
-        */
+        
+        //Para que las celdas estén mejor
         this.Mundo.setRowHeight(42);
-        
-        // Cra una cliente que es su coenxion al server
-        //cliente = new Cliente(this);
-        //cliente.conexion();
-
-        // pide el status al server, el server le enviara
-        // al cliente el numero jugador que es y el nombre
-        // enemigo
-
-        //cliente.salida.writeInt(3);
-        //cliente.salida.flush();
-        
+        this.tableroActual = 0;
+        //Creo un nuevo grafo
         GrafoObjetos grafo = new GrafoObjetos(225);
         
+        String nombreJugador = JOptionPane.showInputDialog("Inserte el nombre del jugador");
+        String IP = JOptionPane.showInputDialog("Inserte el IP del servidor");
+        this.jugadorPropio = new Jugador(nombreJugador, grafo, IP);
+        boolean offline = !(boolean)(this.jugadorPropio.realizarPeticion(new Mensaje(TipoMensaje.activado, null)).getDatoDeRespuesta());
+        this.Desconectado.setVisible(offline);
+        this.cambiarHost.setVisible(offline);
+        /*
         System.out.println(grafo.agregarNuevoVertice(new Templo(Orientacion.Horizontal, 0, 0)));
         System.out.println(grafo.agregarNuevoVertice(new Conector(0, 1)));
         System.out.println(grafo.agregarNuevoVertice(new Conector(0, 2)));
@@ -56,6 +54,7 @@ public class JFrameGuerraMundos extends JFrame {
         grafo.RevisarConexiones(grafo.obtenerElementoIndice(1));
         System.out.println("Mismo tipo");
         grafo.visitarAdyacentesMismoTipo(grafo.obtenerElementoIndice(2));
+        */
         
         this.dibujarTablero(grafo.generarMatriz());
     }
@@ -209,469 +208,7 @@ public class JFrameGuerraMundos extends JFrame {
             }
         });
     }
-    /*
-            
-    void generarTablero()
-    {
-        for(int i=0;i<DIMENSIONES;i++)
-        {
-            for(int j=0;j<DIMENSIONES;j++)
-            {
-                // coloca imagen a todos vacio
-                tableroLabels[i][j] = new JButton(iconoVacio);
-                //añade al panel el boton;
-                pTableroJuego.add(tableroLabels[i][j]);
-                // coloca dimensiones y localidad
-                tableroLabels[i][j].setBounds(50*i, 50*j, 50, 50);
-                // coloca el comand como i , j 
-                tableroLabels[i][j].setActionCommand(i+","+j);//i+","+j
-                
-                //aclickSobreTablero(evt);ñade el listener al boton
-                tableroLabels[i][j].addMouseListener(new MouseAdapter() {
-                public void mouseClicked(java.awt.event.MouseEvent evt) {
-                        
-                    clickSobreTablero(evt);
-                    
-                }
-                });
-                // en logico indica estado en disponible
-                tableroLogico[i][j]=0;
-            }
-        }
-    }
     
-    // reiniciar el juego es poner todo como en un inicio
-    public void reiniciarJuego()
-    {
-        turnoJugador=1;
-        for(int i=0;i<DIMENSIONES;i++)
-        {
-            for(int j=0;j<DIMENSIONES;j++)
-            {
-                tableroLabels[i][j].setIcon(iconoVacio);
-                tableroLogico[i][j] = 0;
-            }
-        }
-    }
-    
-    // este metodo es la respuesta del cliente al click del enemigo
-    public void marcar(int columna, int fila)
-    {
-        // marca el tablero con num de jugador
-        tableroLogico[columna][fila] = turnoJugador;
-        // si soy el 1, marco con o que es el 2, sino con X
-        // pues es el turno del enemigo que estoy marcando
-        if (numeroJugador == 1)
-            tableroLabels[columna][fila].setIcon(iconoCirculo);
-        else
-            tableroLabels[columna][fila].setIcon(iconoEquiz);
-            
-        // pregunta si gano el enemigo
-            if(haGanado())
-            {
-                JOptionPane.showMessageDialog(null, "Ha ganado el jugador "+turnoJugador);
-                
-                reiniciarJuego();
-            }          
-        // este fue el clic del enemigo, marco ahora mi turno
-        turnoJugador = numeroJugador;
-        jLabel1.setText("Turno del Jugador "+turnoJugador);
-        
-        
-//        // es similar a validar si el disparo es bomba o barco
-//        if (Integer.parseInt(txfColumna.getText()) == columna && 
-//                Integer.parseInt(txfFila.getText()) == fila)
-//        {
-//            try {
-//                //escribe la opcion 5 al server
-//                // para que la pase al enemigo
-//                // y haga el metodo de generar bombas
-//                cliente.salida.writeInt(5);
-//                cliente.salida.writeInt(columna);
-//                cliente.salida.writeInt(fila);
-//                
-//            } catch (IOException ex) {
-//                
-//            }
-//        
-//        }
-        
-    }
-    
-    public void bomba(int col, int fila)
-    {
-        JOptionPane.showMessageDialog(this, "Generar bombas y enviarlas una " +
-                "a una al enemigo ("+col+","+fila+")");
-    }
-    
-    public void clickSobreTablero(java.awt.event.MouseEvent evt)
-    {
-        // obtiene el boton 
-        JButton botonTemp = (JButton)evt.getComponent();
-        // obtiene el i,j de action command del boton
-        String identificadorBoton = botonTemp.getActionCommand();
-        
-        // separa el string del action comand para obtener columnas
-        int columna = 
-          Integer.parseInt(identificadorBoton.substring(0,identificadorBoton.indexOf(",")));
-        int fila = 
-          Integer.parseInt(identificadorBoton.substring(1+identificadorBoton.indexOf(",")));
-        
-
-        // Si es equivalente a 0 es porque no hay nada y se puede colocar un componente
-        if(tableroLogico[columna][fila]!=0)
-            return;
-
-        if(atacandoEnemigo1 == true){
-            
-        }
-        else if (atacandoEnemigo2 == true){
-            
-        }
-        else if (atacandoEnemigo3 == true){
-            
-        }
-        else{
-            switch (componenteColocar) {
-                case 1://El mundo es 4x4
-                    if (dineroJugador >= 12000 || mundoInicial == 1){
-                        //Debo revisar si hay espacio
-                        if (columna != DIMENSIONES-1 && fila != DIMENSIONES-1 && tableroLogico[columna+1][fila] == 0 && tableroLogico[columna][fila+1] == 0 && tableroLogico[columna+1][fila+1] == 0){
-
-                            tableroLogico[columna][fila]= 21;//Mundo Izquierda Superior
-                            tableroLogico[columna+1][fila]= 22;//Mundo Derecha Superior
-                            tableroLogico[columna][fila+1]= 23;//Mundo Izquierda Inferior
-                            tableroLogico[columna+1][fila+1]= 24;//Mundo Derecha Inferior
-
-                            tableroLabels[columna][fila].setIcon(iconoCirculo);
-                            tableroLabels[columna+1][fila].setIcon(iconoCirculo);//Mundo Derecha Superior
-                            tableroLabels[columna][fila+1].setIcon(iconoCirculo);//Mundo Izquierda Inferior
-                            tableroLabels[columna+1][fila+1].setIcon(iconoCirculo);//Mundo Derecha Inferior
-                            actualizarTablerosEnemigos();
-                            if (mundoInicial != 1){
-                                dineroJugador -= 12000; 
-                            }
-                            else{
-                                mundoInicial = 0;
-                            }
-                        }
-                    }
-                    break;
-                case 2:
-                    if (dineroJugador >= 100){
-                        tableroLogico[columna][fila]= componenteColocar;//Conector
-                        tableroLabels[columna][fila].setIcon(iconoCirculo);
-                        actualizarTablerosEnemigos();
-                        dineroJugador -= 100;
-                    }
-
-                    break;
-                case 3://Las fabricas son 2x1 o 1x2
-                    if (dineroJugador >= 2000 || mercadoInicial == 1){
-                        if (orientacionColocarFabrica == 0 && fila != DIMENSIONES-1 && tableroLogico[columna][fila+1] == 0){//Vertical
-                            tableroLogico[columna][fila]= 34;//Mercado
-                            tableroLogico[columna][fila+1] = 33;//Mercado
-
-                            tableroLabels[columna][fila].setIcon(iconoCirculo);
-                            tableroLabels[columna][fila+1].setIcon(iconoCirculo);
-                            actualizarTablerosEnemigos();
-
-                            if (mercadoInicial != 1){
-                                dineroJugador -= 2000; 
-                            }
-                            else{
-                                mercadoInicial = 0;
-                            }
-                        }
-                        else if (orientacionColocarFabrica == 1 && columna != DIMENSIONES-1 && tableroLogico[columna+1][fila] == 0){//Horizontal
-                            tableroLogico[columna][fila]= 31;//Mercado
-                            tableroLogico[columna+1][fila]= 32;//Mercado
-
-                            tableroLabels[columna][fila].setIcon(iconoCirculo);
-                            tableroLabels[columna+1][fila].setIcon(iconoCirculo);
-                            actualizarTablerosEnemigos();
-                            
-                            if (mercadoInicial != 1){
-                                dineroJugador -= 2000; 
-                            }
-                            else{
-                                mercadoInicial = 0;
-                            }
-                        }
-                    }
-                    break;
-                case 4://Mina
-                    if (dineroJugador >= 1000){
-                        if (orientacionColocarFabrica == 0 && fila != DIMENSIONES-1 && tableroLogico[columna][fila+1] == 0){//Vertical
-                            tableroLogico[columna][fila]= 44;
-                            tableroLogico[columna][fila+1] = 43;
-
-                            tableroLabels[columna][fila].setIcon(iconoCirculo);
-                            tableroLabels[columna][fila+1].setIcon(iconoCirculo);
-                            actualizarTablerosEnemigos();
-                            dineroJugador -= 1000;
-                        }
-                        else if (orientacionColocarFabrica == 1 && columna != DIMENSIONES-1 && tableroLogico[columna+1][fila] == 0){//Horizontal
-                            tableroLogico[columna][fila]= 41;
-                            tableroLogico[columna+1][fila]= 42;
-
-                            tableroLabels[columna][fila].setIcon(iconoCirculo);
-                            tableroLabels[columna+1][fila].setIcon(iconoCirculo);
-                            actualizarTablerosEnemigos();
-                            dineroJugador -= 1000;
-                        }
-                    }
-                    break;
-                case 5://Armería
-                    if (dineroJugador >= 1500){
-                        if (orientacionColocarFabrica == 0 && fila != DIMENSIONES-1 && tableroLogico[columna][fila+1] == 0){//Vertical
-                            tableroLogico[columna][fila]= 54;
-                            tableroLogico[columna][fila+1] = 53;
-
-                            tableroLabels[columna][fila].setIcon(iconoCirculo);
-                            tableroLabels[columna][fila+1].setIcon(iconoCirculo);
-                            actualizarTablerosEnemigos();
-                            dineroJugador -= 1500;
-                        }
-                        else if (orientacionColocarFabrica == 1 && columna != DIMENSIONES-1 && tableroLogico[columna+1][fila] == 0){//Horizontal
-                            tableroLogico[columna][fila]= 51;
-                            tableroLogico[columna+1][fila]= 52;
-
-                            tableroLabels[columna][fila].setIcon(iconoCirculo);
-                            tableroLabels[columna+1][fila].setIcon(iconoCirculo);
-                            actualizarTablerosEnemigos();
-                            dineroJugador -= 1500;
-                        }
-
-                    }
-                    break;
-                case 6://Templo
-                    if (dineroJugador >= 2500){
-                        if (orientacionColocarFabrica == 0 && fila != DIMENSIONES-1 && tableroLogico[columna][fila+1] == 0){//Vertical
-                            tableroLogico[columna][fila]= 64;
-                            tableroLogico[columna][fila+1] = 63;
-
-                            tableroLabels[columna][fila].setIcon(iconoCirculo);
-                            tableroLabels[columna][fila+1].setIcon(iconoCirculo);
-                            actualizarTablerosEnemigos();
-                            dineroJugador -= 2500;
-                        }
-                        else if (orientacionColocarFabrica == 1 && columna != DIMENSIONES-1 && tableroLogico[columna+1][fila] == 0){//Horizontal
-                            tableroLogico[columna][fila]= 61;
-                            tableroLogico[columna+1][fila]= 62;
-
-                            tableroLabels[columna][fila].setIcon(iconoCirculo);
-                            tableroLabels[columna+1][fila].setIcon(iconoCirculo);
-                            actualizarTablerosEnemigos();
-                            dineroJugador -= 2500;
-                        }
-
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-        
-        
-        lDineroActual.setText("Dinero Actual: "+ dineroJugador +"$");
-        // muestra el turno del jugador
-        jLabel1.setText("Turno del Jugador "+turnoJugador);
- 
-    }
-    
-    public void clickSobreTableroDisparo(java.awt.event.MouseEvent evt)
-    {
-        // obtiene el boton 
-        JButton botonTemp = (JButton)evt.getComponent();
-        // obtiene el i,j de action command del boton
-        String identificadorBoton = botonTemp.getActionCommand();
-        
-        // separa el string del action comand para obtener columnas
-        int columna = 
-          Integer.parseInt(identificadorBoton.substring(0,identificadorBoton.indexOf(",")));
-        int fila = 
-          Integer.parseInt(identificadorBoton.substring(1+identificadorBoton.indexOf(",")));
-        
-        // si ya se disparo entonces nada
-        if(tableroLogico[columna][fila]!=0)
-            return;
-        
-        // si es mi turno continua, si no return
-        if (numeroJugador != turnoJugador)
-            return;
-        
-        // como es turno del cliente marca el logico con su numero
-        tableroLogico[columna][fila]=turnoJugador;
-        // si era el jugador 1 marca con x y cambia el turno a jugador 2
-        if (numeroJugador == 1)
-        {
-            
-            tableroLabels[columna][fila].setIcon(iconoEquiz);
-            turnoJugador=2;
-        }
-        else
-        {
-            // si era jugador 3, marca circulo y turno jugador 1
-            tableroLabels[columna][fila].setIcon(iconoCirculo);
-            turnoJugador=1;
-        }
-        
-        // si era el jugador 1 marca con x y cambia el turno a jugador 2
-        if (numeroJugador == 1){
-            turnoJugador = 2;
-        }
-        else if (numeroJugador == 2){
-            turnoJugador = 3;
-        }
-        else if (numeroJugador == 3){
-            turnoJugador = 4;
-        }
-        else{
-            turnoJugador = 1;
-        }
-        // muestra el turno del jugador
-         jLabel1.setText("Turno del Jugador "+turnoJugador);
-        
-        try {
-            // como el cliente dio clic debe enviar al servidor las coordenadas
-            // el servidor se las pasara al thread cliente para que este
-            // las muestre (haga el marcar)
-            // envia las coordenadas
-            cliente.salida.writeInt(1);
-            cliente.salida.writeInt(columna);
-            cliente.salida.writeInt(fila);
-        } catch (IOException ex) {
-            
-        }
-         
-        // si gano el jugador 1 lo indica
-        if(haGanado())
-        {
-            JOptionPane.showMessageDialog(null, "Ha ganado el jugador 1");
-            reiniciarJuego();
-        }
-    }
-    
-    boolean haGanado()
-    {
-        
-        //Ganó en las filas
-        for(int i=0;i<3;i++)
-        {
-        if ((tableroLogico[i][0]==tableroLogico[i][1])
-                &&(tableroLogico[i][1]==tableroLogico[i][2])
-                && !(tableroLogico[i][0]==0))
-        {
-            return true;
-        }
-        }
-        
-        //Gano en las columnas
-        for(int i=0;i<3;i++)
-        {
-        if ((tableroLogico[0][i]==tableroLogico[1][i])
-                &&(tableroLogico[1][i]==tableroLogico[2][i])
-                && !(tableroLogico[0][i]==0))
-        {
-            return true;
-        }
-        }
-        //Verificar diagonal 1
-        if ((tableroLogico[0][0]==tableroLogico[1][1])
-                &&(tableroLogico[1][1]==tableroLogico[2][2])
-                && !(tableroLogico[0][0]==0))
-            return true;
-        
-        //Verificar diagonal 2
-        if ((tableroLogico[2][0]==tableroLogico[1][1])
-                &&(tableroLogico[1][1]==tableroLogico[0][2])
-                && !(tableroLogico[2][0]==0))
-            return true;
-        
-        return false;
-    }
-    
-    // set el nombre del enemigo
-    public void setEnemigo(String enem)
-    {
-        
-    }
-    public void actualizarTablerosEnemigos(){
-        try {
-            System.out.println("TABLERO Logico");
-                    for (int i = 0; i < 15 ; i++){
-                        for (int j = 0; j < 15 ; j++){
-                            System.out.print(tableroLogico[j][i]);
-                        }
-                        System.out.println();
-                    }
-            cliente.salida.writeInt(6);
-            cliente.salida.writeInt(numeroJugador);
-            cliente.salida.reset();
-            cliente.salida.writeUnshared(tableroLogico);
- 
-            
-        } catch (IOException ex) {
-            Logger.getLogger(JFrameGuerraMundos.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
-    public void mostrarTablero(int indicador){
-        if (indicador == 0){//Es mi popio mapa
-            for(int i=0;i<DIMENSIONES;i++){
-                for(int j=0;j<DIMENSIONES;j++){
-
-                    if (tableroLogico[j][i] == 0)
-                        tableroLabels[j][i].setIcon(iconoVacio);
-                    else if (tableroLogico[j][i] != 0){
-                        tableroLabels[j][i].setIcon(iconoCirculo);
-                    }
-                }
-            }
-        }
-        
-        else if (indicador == 1){//Enemigo 1
-            for(int i=0;i<DIMENSIONES;i++){
-                for(int j=0;j<DIMENSIONES;j++){
-
-                    if (tableroEnemigo1[j][i] == 0)
-                        tableroLabels[j][i].setIcon(iconoVacio);
-                    else if (tableroEnemigo1[j][i] != 0){
-                        tableroLabels[j][i].setIcon(iconoEquiz);
-                    }
-                }
-            }
-        }
-        
-        else if (indicador == 2){//Enemigo 2
-            for(int i=0;i<DIMENSIONES;i++){
-                for(int j=0;j<DIMENSIONES;j++){
-
-                    if (tableroEnemigo2[j][i] == 0)
-                        tableroLabels[j][i].setIcon(iconoVacio);
-                    else if (tableroEnemigo2[j][i] != 0){
-                        tableroLabels[i][j].setIcon(iconoEquiz);
-                    }
-                }
-            }
-        }
-        
-        else if (indicador == 3){//Enemigo 3
-            for(int i=0;i<DIMENSIONES;i++){
-                for(int j=0;j<DIMENSIONES;j++){
-
-                    if (tableroEnemigo3[j][i] == 0)
-                        tableroLabels[j][i].setIcon(iconoVacio);
-                    else if (tableroEnemigo3[j][i] != 0){
-                        tableroLabels[j][i].setIcon(iconoEquiz);
-                    }
-                }
-            }
-        }
-        
-    }
-    */
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -694,11 +231,16 @@ public class JFrameGuerraMundos extends JFrame {
         NumeroMundo = new javax.swing.JLabel();
         MundoAnterior = new javax.swing.JButton();
         MundoSiguiente = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
         TextFieldChat = new javax.swing.JTextField();
         jComboBox1 = new javax.swing.JComboBox<>();
         EnviarMensaje = new javax.swing.JButton();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        TextAreaChat = new javax.swing.JTextArea();
+        EncolarDuo = new javax.swing.JButton();
+        EncolarTrio = new javax.swing.JButton();
+        EncolarCuarteto = new javax.swing.JButton();
+        Desconectado = new javax.swing.JLabel();
+        cambiarHost = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -750,33 +292,65 @@ public class JFrameGuerraMundos extends JFrame {
             Mundo.getColumnModel().getColumn(0).setResizable(false);
         }
 
-        lDineroActual.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
         lDineroActual.setText("Dinero Actual: 4000$");
 
-        LabelTurno.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
         LabelTurno.setText("Turno del Jugador: Jugador 1");
 
         TipoFabricaComprar.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         FabricaComprar.setText("Comprar");
 
-        NumeroMundo.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
         NumeroMundo.setText("Número de Mundo: 0");
 
         MundoAnterior.setText("Mundo Anterior");
 
         MundoSiguiente.setText("Mundo Siguiente");
 
-        jTextArea1.setEditable(false);
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane1.setViewportView(jTextArea1);
-
         TextFieldChat.setText("Mensaje");
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Jugador 1", "Jugador 2", "Jugador 3", "Jugador 1,2", "Jugador 1,3", "Jugador 2,3", "Jugador 1,2,3" }));
 
         EnviarMensaje.setText("Enviar");
+        EnviarMensaje.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                EnviarMensajeActionPerformed(evt);
+            }
+        });
+
+        TextAreaChat.setEditable(false);
+        TextAreaChat.setColumns(20);
+        TextAreaChat.setRows(5);
+        jScrollPane3.setViewportView(TextAreaChat);
+
+        EncolarDuo.setText("Encolarse en Dúo");
+        EncolarDuo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                EncolarDuoActionPerformed(evt);
+            }
+        });
+
+        EncolarTrio.setText("Encolarse en Trío");
+        EncolarTrio.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                EncolarTrioActionPerformed(evt);
+            }
+        });
+
+        EncolarCuarteto.setText("Encolarse en Cuarteto");
+        EncolarCuarteto.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                EncolarCuartetoActionPerformed(evt);
+            }
+        });
+
+        Desconectado.setText("Desconectado");
+
+        cambiarHost.setText("Cambiar Huesped");
+        cambiarHost.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cambiarHostActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -785,34 +359,46 @@ public class JFrameGuerraMundos extends JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addComponent(bComboShot, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE)
-                                .addComponent(bBomba, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(bMultiShot, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(bMisil, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(TipoFabricaComprar, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(FabricaComprar))
-                            .addComponent(MundoAnterior, javax.swing.GroupLayout.Alignment.TRAILING))
-                        .addComponent(jScrollPane1)
-                        .addComponent(TextFieldChat))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(EnviarMensaje, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(EnviarMensaje, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(bComboShot, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE)
+                                    .addComponent(bBomba, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(bMultiShot, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(bMisil, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(TipoFabricaComprar, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(FabricaComprar))
+                                .addComponent(MundoAnterior, javax.swing.GroupLayout.Alignment.TRAILING))
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(TextFieldChat, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 893, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(EncolarCuarteto, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(EncolarTrio, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(EncolarDuo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(Desconectado, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(MundoSiguiente)
-                            .addComponent(LabelTurno, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addComponent(NumeroMundo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(lDineroActual, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(MundoSiguiente)
+                                    .addComponent(LabelTurno, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(NumeroMundo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(lDineroActual, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(cambiarHost, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -826,8 +412,18 @@ public class JFrameGuerraMundos extends JFrame {
                         .addComponent(LabelTurno, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lDineroActual, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(142, 142, 142)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(EncolarDuo, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(EncolarTrio, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(EncolarCuarteto, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
                         .addComponent(MundoSiguiente)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(Desconectado, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cambiarHost)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(bMisil, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -844,7 +440,7 @@ public class JFrameGuerraMundos extends JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(MundoAnterior)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 288, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 288, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(TextFieldChat, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -862,7 +458,39 @@ public class JFrameGuerraMundos extends JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_bMultiShotActionPerformed
 
-                                     
+    private void EnviarMensajeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EnviarMensajeActionPerformed
+        // TODO add your handling code here:
+        ArrayList <Object> arrayAEnviar = new ArrayList();
+        this.jugadorPropio.realizarPeticion(new Mensaje(TipoMensaje.enviarMensaje, this.TextFieldChat.getText()));
+    }//GEN-LAST:event_EnviarMensajeActionPerformed
+
+    private void EncolarDuoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EncolarDuoActionPerformed
+        // TODO add your handling code here:
+        ArrayList <Object> arrayAEnviar = new ArrayList();
+        arrayAEnviar.add(this.jugadorPropio);
+        arrayAEnviar.add(2);
+        this.jugadorPropio.realizarPeticion(new Mensaje(TipoMensaje.unirseACola, arrayAEnviar));
+    }//GEN-LAST:event_EncolarDuoActionPerformed
+
+    private void EncolarTrioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EncolarTrioActionPerformed
+        // TODO add your handling code here:
+        ArrayList <Object> arrayAEnviar = new ArrayList();
+        arrayAEnviar.add(this);
+        arrayAEnviar.add(3);
+        this.jugadorPropio.realizarPeticion(new Mensaje(TipoMensaje.unirseACola, arrayAEnviar));
+    }//GEN-LAST:event_EncolarTrioActionPerformed
+
+    private void EncolarCuartetoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EncolarCuartetoActionPerformed
+        // TODO add your handling code here:
+        ArrayList <Object> arrayAEnviar = new ArrayList();
+        arrayAEnviar.add(this);
+        arrayAEnviar.add(4);
+        this.jugadorPropio.realizarPeticion(new Mensaje(TipoMensaje.unirseACola, arrayAEnviar));
+    }//GEN-LAST:event_EncolarCuartetoActionPerformed
+
+    private void cambiarHostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cambiarHostActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cambiarHostActionPerformed
 
     /**
      * @param args the command line arguments
@@ -876,6 +504,10 @@ public class JFrameGuerraMundos extends JFrame {
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel Desconectado;
+    private javax.swing.JButton EncolarCuarteto;
+    private javax.swing.JButton EncolarDuo;
+    private javax.swing.JButton EncolarTrio;
     private javax.swing.JButton EnviarMensaje;
     private javax.swing.JButton FabricaComprar;
     private javax.swing.JLabel LabelTurno;
@@ -883,16 +515,48 @@ public class JFrameGuerraMundos extends JFrame {
     private javax.swing.JButton MundoAnterior;
     private javax.swing.JButton MundoSiguiente;
     private javax.swing.JLabel NumeroMundo;
+    private javax.swing.JTextArea TextAreaChat;
     private javax.swing.JTextField TextFieldChat;
     private javax.swing.JComboBox<String> TipoFabricaComprar;
     private javax.swing.JButton bBomba;
     private javax.swing.JButton bComboShot;
     private javax.swing.JButton bMisil;
     private javax.swing.JButton bMultiShot;
+    private javax.swing.JButton cambiarHost;
     private javax.swing.JComboBox<String> jComboBox1;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JLabel lDineroActual;
     // End of variables declaration//GEN-END:variables
+
+    public void actualizarTablero(Mensaje mensajeConActualizaciones){
+        //aquí se van a actualizar los cambios que se hayan hecho
+        Partida partidaRecibida = (Partida)mensajeConActualizaciones.getDatoDeRespuesta();
+        this.jugadorPropio = partidaRecibida.getJugadores().get(partidaRecibida.getJugadores().indexOf(new Jugador(this.jugadorPropio.getNombreJugador())));
+        int i = 0;
+        for (int j = 0; j < enemigos.size(); j++) {
+            Jugador get = enemigos.get(j);
+            this.enemigos.set(i, get);
+            i++;
+        }
+        if(this.tableroActual == this.jugadorPropio.getNumeroJugador()){
+            this.dibujarTablero(this.jugadorPropio.getGrafoPropio().generarMatriz());
+        }
+        else{
+            for (int j = 0; j < enemigos.size(); j++) {
+                Jugador get = enemigos.get(j);
+                if(get.getNumeroJugador() == this.tableroActual){
+                    this.dibujarTablero(get.getGrafoPropio().generarMatriz());
+                    break;
+                }
+            }
+        }
+    }
+    
+    public void mostrarMensajeEnChat(String mensajeConActualizaciones){
+        //aquí se va a actualizar el chatsito
+        this.TextAreaChat.setText(this.TextAreaChat.getText().concat("\n".concat(mensajeConActualizaciones)));
+    }
+    
+    
 }

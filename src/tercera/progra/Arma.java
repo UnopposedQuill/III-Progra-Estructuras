@@ -10,7 +10,7 @@ package tercera.progra;
  * hacer que tuvieran un enum
  * @author esteban
  */
-public class Arma {
+public class Arma implements java.io.Serializable{
     private int tipoArma;
 
     public Arma(int tipoArma) {

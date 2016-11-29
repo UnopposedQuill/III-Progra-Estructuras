@@ -6,15 +6,16 @@
 package tercera.progra;
 
 import Gui.TipoFabrica;
+import java.io.Serializable;
 import java.util.*;
 
 /**
  *
  * @author Esteban
  */
-public class GrafoObjetos {
+public class GrafoObjetos implements Serializable{
     int cantidadVertices;
-    private Object[] vertices;
+    private Elemento[] vertices;
     private int[][] matrizAdyacencia;
     private boolean[] visitados;
     private ArrayList<Coordenada> danhos;
@@ -26,7 +27,7 @@ public class GrafoObjetos {
     public GrafoObjetos(int cantidadVertices) {
         this.cantidadVertices = cantidadVertices;
         matrizAdyacencia = new int[cantidadVertices][cantidadVertices];
-        vertices = new Object[cantidadVertices];
+        vertices = new Elemento[cantidadVertices];
         visitados = new boolean[cantidadVertices];
         
         for (int i = 0; i < cantidadVertices; i++){
@@ -48,8 +49,33 @@ public class GrafoObjetos {
      * @param coordenadaDelDanho La coordenada donde está el daño
      * @return True si se insertó correctamente, False en el otro csao
      */
-    public boolean agregarDanhos(Coordenada coordenadaDelDanho){
-        return this.danhos.add(coordenadaDelDanho);
+    public int agregarDanhos(ArrayList<Coordenada> coordenadaDelDanho){
+        boolean disparoAgujeroNegro = false;
+        boolean recibenDanhos = false;
+        int respuesta = 0;
+        for (int i = 0; i < coordenadaDelDanho.size(); i++){
+            for (int j = 0; j < cantidadVertices ; j++){
+                if(vertices[j] != null){
+                    if (coordenadaDelDanho.get(i).equals(vertices[j].getCoordenadas())){
+                        //Encontré un componente con esas coordenadas
+                        if (vertices[j] instanceof AgujeroNegro)
+                            disparoAgujeroNegro = true;//Encontró un agujero negro en las coordenadas de disparo
+                    }
+                }
+            }
+        }
+        
+        if (danhos.addAll(coordenadaDelDanho))
+            recibenDanhos = true;
+        
+        if (recibenDanhos == false && disparoAgujeroNegro == false)
+            return 0;//Error al actualizar datos y no pega en agujero negro
+        else if (recibenDanhos == true && disparoAgujeroNegro == false)
+            return 1;//Agrega los datos pero no pega en agujero negro
+        else if (recibenDanhos == true && disparoAgujeroNegro == true)
+            return 2;//Agrega los datos y pega en agujero negro
+        else
+            return 3;//Error al actualizar datos y pega en agujero negro
     }
     
     public boolean agregarNuevoVertice (Elemento nuevoVertice){
@@ -63,7 +89,46 @@ public class GrafoObjetos {
         }
         return false;//No encontró espacio disponible
     }
-    
+    /**
+     * Elimina un Vertice/Elemento, también elimina todas las posibles conexiones
+     * @param eliminarVertice
+     * @return 
+     */
+    public boolean eliminarVertice (Elemento eliminarVertice){
+        if (vertices[eliminarVertice.getPosicionGrafo()] != null){
+            eliminarConexiones(eliminarVertice);
+            vertices[eliminarVertice.getPosicionGrafo()] = null;
+            return true;
+        }
+        return false;//Ya existía
+    }
+    public int calcularDistancia (Elemento desde, Elemento hasta){
+        int distanciaFinal = 0;
+        return distanciaFinal;
+    }
+    /**
+     * Agrega un nuevo vertice y al mismo tiempo raliza la conexión con el segundo parámetro
+     * @param nuevoDesde
+     * @param hasta
+     * @return 
+     */
+    public boolean agregarNuevoVertice (Elemento nuevoDesde, Elemento hasta){
+        for (int i = 0; i < cantidadVertices; i++){
+            if(vertices[i] == null){
+                nuevoDesde.setPosicionGrafo(i);
+                vertices[i] = nuevoDesde;
+                return agregarNuevaConexion(nuevoDesde, hasta, 0); //Lo agregó de manera exitosa y además logró hacer la conexión
+            }
+        }
+        return false;//No encontró espacio disponible
+    }
+    /**
+     * Agrega una nueva conexion desde un elemento hasta otro
+     * @param desde
+     * @param hasta
+     * @param distancia
+     * @return 
+     */
     public boolean agregarNuevaConexion (Elemento desde, Elemento hasta, int distancia){
         //Me aseguro de que existen los vertices
         int desdeLogico = desde.getPosicionGrafo();
@@ -76,7 +141,11 @@ public class GrafoObjetos {
         }
         return false;
     }
-    
+    /**
+     * Revisa las conexiones del elemento
+     * @param desde
+     * @return 
+     */
     @SuppressWarnings("empty-statement")
     public int RevisarConexiones (Elemento desde){
         int cantidadConexiones = 0;
@@ -128,21 +197,24 @@ public class GrafoObjetos {
                 if(matrizAdyacencia[desdeLogico][i] != 0){
                     cantidadConexiones++;
                     visitados[i] = true;
+                    if (vertices[i] instanceof Conector){
+                        //Encontré un conector, llamada recursiva
+                        visitarConectados ((Elemento) vertices[desdeLogico]);
+                    }
                 }
             }
-            if (vertices[desdeLogico] instanceof Conector){
-                //Encontré un conector, llamada recursiva
-                visitarConectados ((Elemento) vertices[desdeLogico]);
-            }
+            
         }
         return cantidadConexiones;
     }
+    
+    
     
     public int visitarAdyacentesMismoTipo (Object tipo){
         int cantidadConexiones = 0;
         //Me aseguro de que existen los vertices
         for (int i = 0; i < cantidadVertices; i++){
-            if (vertices[i] instanceof Conector){
+            if (vertices[i] != null && vertices[i] instanceof Conector){
                 System.out.println("ASDASDASD");
                 RevisarConexiones((Elemento) vertices[i]);
                 for (int j = 0; j < cantidadVertices; j++){
@@ -156,7 +228,12 @@ public class GrafoObjetos {
         
         return cantidadConexiones;
     }
-    
+    /**
+     * Elimina la conexión entre dos elementos
+     * @param desde
+     * @param hasta
+     * @return 
+     */
     public boolean eliminarConexion (Elemento desde, Elemento hasta){
         //Me aseguro de que existen los vertices
         int desdeLogico = desde.getPosicionGrafo();
@@ -168,6 +245,27 @@ public class GrafoObjetos {
             }
         }
         return false;
+    }
+    /**
+     * Elimina TODAS las conexiones del componente
+     * @param componente
+     * @return 
+     */
+    public boolean eliminarConexiones (Elemento componente){
+        int posicionComponente = componente.getPosicionGrafo();
+        //Me aseguro de que existen los vertices
+        if (vertices[posicionComponente] != null){
+            for (int i = 0; i < cantidadVertices; i++){
+                if(matrizAdyacencia[posicionComponente][i] != 0){
+                    matrizAdyacencia[posicionComponente][i] = 0;
+                }
+                if(matrizAdyacencia[i][posicionComponente] != 0){
+                    matrizAdyacencia[i][posicionComponente] = 0;
+                }
+            }
+            return true;//Se eliminaron las conexiones
+        }
+        return false;//No existe dicho componente
     }
     
     public void limpiarVisitados (){
@@ -184,6 +282,91 @@ public class GrafoObjetos {
         return (Elemento)vertices[indice];
     }
     
+    /**
+     * Esta funcion va  a revisar el array de daños y el de vectores para encontrar si se ha destruido un componente, se debe llamar después de cada disparo
+     */
+    public Elemento[] revisarDestruccionComponentes(){
+    //private Elemento[] vertices;
+    //private int[][] matrizAdyacencia;
+    //private boolean[] visitados;
+    //private ArrayList<Coordenada> danhos;
+        Fabrica fabrica;
+        boolean danhoFabrica;
+        Elemento[] componentesExplotar = new Elemento[cantidadVertices];
+        Mundo mundo;
+        int indiceExplotar = 0;
+        boolean danhoMundo;
+        boolean danhoMundo2;
+        boolean danhoMundo3;
+        boolean danhoMundo4;
+        for (int i = 0; i < cantidadVertices; i++){
+            //Para todos los vertices
+            if (vertices[i] != null){
+                danhoFabrica = false;
+
+                danhoMundo = false;
+                danhoMundo2 = false;
+                danhoMundo3 = false;
+                danhoMundo4 = false;
+                for (int j = 0; j < danhos.size(); j++){
+                    //Para todos los daños recibidos
+                    
+                    if (vertices[i] instanceof Fabrica){
+                        //2x1 horizontal o vertical
+                        fabrica = (Fabrica) vertices[i];
+                        
+                        if (danhos.get(j).equals(fabrica.getCoordenadas()) || danhos.get(j).equals(fabrica.getCoordenadaExtra())  && danhoFabrica){
+                            //Se ha destruido la fábrica
+                            //Debo explotar en estas coordenadas
+                            //Después debo de eliminarlo del grafo
+                            componentesExplotar[indiceExplotar] = vertices[i];
+                            indiceExplotar++;
+                        }
+                        else{
+                            danhoFabrica = true;
+                        }
+                    }
+                    else if (vertices[i] instanceof Mundo){
+                        //4x4
+                        mundo = (Mundo) vertices[i];
+                        if (danhos.get(j).equals(mundo.getCoordenadas())){
+                             danhoMundo = true;
+                        }
+                        else if (danhos.get(j).equals(mundo.getCoordenada2())){
+                            danhoMundo2 = true;
+                        }
+                        else if (danhos.get(j).equals(mundo.getCoordenada3())){
+                            danhoMundo3 = true;
+                        }
+                        else if (danhos.get(j).equals(mundo.getCoordenada4())){
+                            danhoMundo4 = true;
+                        }
+                        
+                        if (danhoMundo && danhoMundo2 && danhoMundo3 && danhoMundo4){
+                            //Se ha destruido el mundo
+                            //Debo explotar en estas coordenadas
+                            //Después debo de eliminarlo del grafo
+                            componentesExplotar[indiceExplotar] = vertices[i];
+                            indiceExplotar++;
+                        }
+                    }
+                    else{
+                        //1x1
+                        if (danhos.get(j).equals(vertices[i].getCoordenadas())){
+                            //Se ha destruido la fábrica
+                            //Debo explotar en estas coordenadas
+                            componentesExplotar[indiceExplotar] = vertices[i];
+                            indiceExplotar++;
+                        }
+                    }
+
+                }
+            }
+            
+        }
+        
+        return componentesExplotar;
+    }
     
     public Object[][] generarMatriz (){
         Object[][] datosGuia = new Object[15][15];
@@ -191,78 +374,108 @@ public class GrafoObjetos {
         int posicionY;
         for (int i = 0; i < cantidadVertices; i++){
             if(vertices[i] != null){
-                if (vertices[i] instanceof AgujeroNegro){
-                    AgujeroNegro elementoPintar = (AgujeroNegro)vertices[i];
-                    posicionX = elementoPintar.getPosicionX();
-                    posicionY = elementoPintar.getPosicionY();
+                posicionX = vertices[i].getPosicionX();
+                posicionY = vertices[i].getPosicionY();
+                if (revisarDanhos(posicionX, posicionY))
+                    datosGuia[posicionX][posicionY] = TipoFabrica.EXPLOSION1;
+                else if (vertices[i] instanceof AgujeroNegro)
                     datosGuia[posicionX][posicionY] = TipoFabrica.AGUJERO;
-                }
                 else if (vertices[i] instanceof Armeria){
                     Armeria elementoPintar = (Armeria)vertices[i];
-                    posicionX = elementoPintar.getPosicionX();
-                    posicionY = elementoPintar.getPosicionY();
                     if (elementoPintar.getOrientacionFabrica() == Orientacion.Horizontal){
                         datosGuia[posicionX][posicionY] = TipoFabrica.ARMERIAH1;
-                        datosGuia[posicionX+1][posicionY] = TipoFabrica.ARMERIAH2;
+                        
+                        if (revisarDanhos(posicionX+1, posicionY))
+                            datosGuia[posicionX+1][posicionY] = TipoFabrica.EXPLOSION1;
+                        else
+                            datosGuia[posicionX+1][posicionY] = TipoFabrica.ARMERIAH2;
                     }
                     else if (elementoPintar.getOrientacionFabrica() == Orientacion.Vertical){
                         datosGuia[posicionX][posicionY] = TipoFabrica.ARMERIAV1;
-                        datosGuia[posicionX][posicionY+1] = TipoFabrica.ARMERIAV2;
+                        
+                        if (revisarDanhos(posicionX, posicionY+1))
+                            datosGuia[posicionX][posicionY+1] = TipoFabrica.EXPLOSION1;
+                        else
+                            datosGuia[posicionX][posicionY+1] = TipoFabrica.ARMERIAV2;
                     }
                     
                 }
                 else if (vertices[i] instanceof Conector){
-                    Conector elementoPintar = (Conector)vertices[i];
-                    posicionX = elementoPintar.getPosicionX();
-                    posicionY = elementoPintar.getPosicionY();
                     datosGuia[posicionX][posicionY] = TipoFabrica.CONECTOR;
                 }
                 else if (vertices[i] instanceof Mina){
                     Mina elementoPintar = (Mina)vertices[i];
-                    posicionX = elementoPintar.getPosicionX();
-                    posicionY = elementoPintar.getPosicionY();
                     if (elementoPintar.getOrientacionFabrica() == Orientacion.Horizontal){
                         datosGuia[posicionX][posicionY] = TipoFabrica.MINAH1;
-                        datosGuia[posicionX+1][posicionY] = TipoFabrica.MINAH2;
+                        
+                        if (revisarDanhos(posicionX+1, posicionY))
+                            datosGuia[posicionX+1][posicionY] = TipoFabrica.EXPLOSION1;
+                        else
+                            datosGuia[posicionX+1][posicionY] = TipoFabrica.MINAH2;
                     }
                     else if (elementoPintar.getOrientacionFabrica() == Orientacion.Vertical){
                         datosGuia[posicionX][posicionY] = TipoFabrica.MINAV1;
-                        datosGuia[posicionX][posicionY+1] = TipoFabrica.MINAV2;
+                        
+                        if (revisarDanhos(posicionX, posicionY+1))
+                            datosGuia[posicionX][posicionY+1] = TipoFabrica.EXPLOSION1;
+                        else
+                            datosGuia[posicionX][posicionY+1] = TipoFabrica.MINAV2;
                     }
                 }
                 else if (vertices[i] instanceof Mundo){
-                    Mundo elementoPintar = (Mundo)vertices[i];
-                    posicionX = elementoPintar.getPosicionX();
-                    posicionY = elementoPintar.getPosicionY();
                     datosGuia[posicionX][posicionY] = TipoFabrica.MUNDO1;
-                    datosGuia[posicionX+1][posicionY] = TipoFabrica.MUNDO2;
-                    datosGuia[posicionX][posicionY+1] = TipoFabrica.MUNDO3;
-                    datosGuia[posicionX+1][posicionY+1] = TipoFabrica.MUNDO4;
+                    
+                    if (revisarDanhos(posicionX+1, posicionY))
+                        datosGuia[posicionX+1][posicionY] = TipoFabrica.EXPLOSION1;
+                    else
+                        datosGuia[posicionX+1][posicionY] = TipoFabrica.MUNDO2;
+                    
+                    if (revisarDanhos(posicionX, posicionY+1))
+                        datosGuia[posicionX][posicionY+1] = TipoFabrica.EXPLOSION1;
+                    else
+                        datosGuia[posicionX][posicionY+1] = TipoFabrica.MUNDO3;
+                    
+                    if (revisarDanhos(posicionX+1, posicionY+1))
+                        datosGuia[posicionX+1][posicionY+1] = TipoFabrica.EXPLOSION1;
+                    else
+                        datosGuia[posicionX+1][posicionY+1] = TipoFabrica.MUNDO4;
                 }
                 else if (vertices[i] instanceof Templo){
                     Templo elementoPintar = (Templo)vertices[i];
-                    posicionX = elementoPintar.getPosicionX();
-                    posicionY = elementoPintar.getPosicionY();
                     if (elementoPintar.getOrientacionFabrica() == Orientacion.Horizontal){
                         datosGuia[posicionX][posicionY] = TipoFabrica.TEMPLOH1;
-                        datosGuia[posicionX+1][posicionY] = TipoFabrica.TEMPLOH2;
+                        
+                        if (revisarDanhos(posicionX+1, posicionY))
+                            datosGuia[posicionX+1][posicionY] = TipoFabrica.EXPLOSION1;
+                        else
+                            datosGuia[posicionX+1][posicionY] = TipoFabrica.TEMPLOH2;
                     }
                     else if (elementoPintar.getOrientacionFabrica() == Orientacion.Vertical){
                         datosGuia[posicionX][posicionY] = TipoFabrica.TEMPLOV1;
-                        datosGuia[posicionX][posicionY+1] = TipoFabrica.TEMPLOV2;
+                        
+                        if (revisarDanhos(posicionX, posicionY+1))
+                            datosGuia[posicionX][posicionY+1] = TipoFabrica.EXPLOSION1;
+                        else
+                            datosGuia[posicionX][posicionY+1] = TipoFabrica.TEMPLOV2;
                     }
                 }
                 else if (vertices[i] instanceof Mercado){
                     Mercado elementoPintar = (Mercado)vertices[i];
-                    posicionX = elementoPintar.getPosicionX();
-                    posicionY = elementoPintar.getPosicionY();
                     if (elementoPintar.getOrientacionFabrica() == Orientacion.Horizontal){
                         datosGuia[posicionX][posicionY] = TipoFabrica.MERCADOH1;
-                        datosGuia[posicionX+1][posicionY] = TipoFabrica.MERCADOH2;
+                        
+                        if (revisarDanhos(posicionX+1, posicionY))
+                            datosGuia[posicionX+1][posicionY] = TipoFabrica.EXPLOSION1;
+                        else
+                            datosGuia[posicionX+1][posicionY] = TipoFabrica.MERCADOH2;
                     }
                     else if (elementoPintar.getOrientacionFabrica() == Orientacion.Vertical){
                         datosGuia[posicionX][posicionY] = TipoFabrica.MERCADOV1;
-                        datosGuia[posicionX][posicionY+1] = TipoFabrica.MERCADOV2;
+                        
+                        if (revisarDanhos(posicionX, posicionY+1))
+                            datosGuia[posicionX][posicionY+1] = TipoFabrica.EXPLOSION1;
+                        else
+                            datosGuia[posicionX][posicionY+1] = TipoFabrica.MERCADOV2;
                     }
                 }
             }
@@ -271,4 +484,214 @@ public class GrafoObjetos {
         return datosGuia;
     }
     
+    public Elemento[] obtenerDesconectadosMundo(){
+        Elemento[] desconectadosMundo;
+        Mundo mundoEncontrado;
+        //Busco un mundo para empezar a visitar
+        for (int i = 0; i < cantidadVertices; i++){
+            if (vertices[i] instanceof Mundo){
+                mundoEncontrado = (Mundo)vertices[i];
+                visitarConectados(mundoEncontrado);
+            } 
+        }
+        //Ya visite a los que estaban conectados
+        desconectadosMundo = obtenerNoVisitado();
+        return desconectadosMundo;
+    }
+    
+    public Elemento[] obtenerVisitado(){
+        Elemento[] componentesVisitados = new Elemento[cantidadVertices];
+        int contador = 0;
+        
+        for (int i = 0; i < cantidadVertices; i++){
+            componentesVisitados[i] = null;
+        }
+        
+        for (int i = 0; i < cantidadVertices; i++){
+            if (visitados[i]){
+                componentesVisitados[contador] = vertices[i];
+            } 
+        }
+        return componentesVisitados;
+    }
+    public Elemento[] obtenerNoVisitado(){
+        Elemento[] componentesVisitados = new Elemento[cantidadVertices];
+        int contador = 0;
+        
+        for (int i = 0; i < cantidadVertices; i++){
+            componentesVisitados[i] = null;
+        }
+        
+        for (int i = 0; i < cantidadVertices; i++){
+            if (!visitados[i]){
+                componentesVisitados[contador] = vertices[i];
+            } 
+        }
+        return componentesVisitados;
+    }
+    public Object[][] generarMatrizDesconectadosConectadosMundo (){
+        Object[][] datosGuia = new Object[15][15];
+        
+        Elemento[] noVisitado = obtenerDesconectadosMundo();
+        
+        int posicionX;
+        int posicionY;
+        for (int i = 0; i < cantidadVertices; i++){
+            if(noVisitado[i] != null){
+                posicionX = noVisitado[i].getPosicionX();
+                posicionY = noVisitado[i].getPosicionY();
+                if (revisarDanhos(posicionX, posicionY))
+                    datosGuia[posicionX][posicionY] = TipoFabrica.EXPLOSION1;
+                else if (noVisitado[i] instanceof AgujeroNegro)
+                    datosGuia[posicionX][posicionY] = TipoFabrica.AGUJERO;
+                else if (noVisitado[i] instanceof Armeria){
+                    Armeria elementoPintar = (Armeria)noVisitado[i];
+                    if (elementoPintar.getOrientacionFabrica() == Orientacion.Horizontal){
+                        datosGuia[posicionX][posicionY] = TipoFabrica.ARMERIAH1;
+                        
+                        if (revisarDanhos(posicionX+1, posicionY))
+                            datosGuia[posicionX+1][posicionY] = TipoFabrica.EXPLOSION1;
+                        else
+                            datosGuia[posicionX+1][posicionY] = TipoFabrica.ARMERIAH2;
+                    }
+                    else if (elementoPintar.getOrientacionFabrica() == Orientacion.Vertical){
+                        datosGuia[posicionX][posicionY] = TipoFabrica.ARMERIAV1;
+                        
+                        if (revisarDanhos(posicionX, posicionY+1))
+                            datosGuia[posicionX][posicionY+1] = TipoFabrica.EXPLOSION1;
+                        else
+                            datosGuia[posicionX][posicionY+1] = TipoFabrica.ARMERIAV2;
+                    }
+                    
+                }
+                else if (noVisitado[i] instanceof Conector){
+                    datosGuia[posicionX][posicionY] = TipoFabrica.CONECTOR;
+                }
+                else if (noVisitado[i] instanceof Mina){
+                    Mina elementoPintar = (Mina)noVisitado[i];
+                    if (elementoPintar.getOrientacionFabrica() == Orientacion.Horizontal){
+                        datosGuia[posicionX][posicionY] = TipoFabrica.MINAH1;
+                        
+                        if (revisarDanhos(posicionX+1, posicionY))
+                            datosGuia[posicionX+1][posicionY] = TipoFabrica.EXPLOSION1;
+                        else
+                            datosGuia[posicionX+1][posicionY] = TipoFabrica.MINAH2;
+                    }
+                    else if (elementoPintar.getOrientacionFabrica() == Orientacion.Vertical){
+                        datosGuia[posicionX][posicionY] = TipoFabrica.MINAV1;
+                        
+                        if (revisarDanhos(posicionX, posicionY+1))
+                            datosGuia[posicionX][posicionY+1] = TipoFabrica.EXPLOSION1;
+                        else
+                            datosGuia[posicionX][posicionY+1] = TipoFabrica.MINAV2;
+                    }
+                }
+                else if (noVisitado[i] instanceof Mundo){
+                    datosGuia[posicionX][posicionY] = TipoFabrica.MUNDO1;
+                    
+                    if (revisarDanhos(posicionX+1, posicionY))
+                        datosGuia[posicionX+1][posicionY] = TipoFabrica.EXPLOSION1;
+                    else
+                        datosGuia[posicionX+1][posicionY] = TipoFabrica.MUNDO2;
+                    
+                    if (revisarDanhos(posicionX, posicionY+1))
+                        datosGuia[posicionX][posicionY+1] = TipoFabrica.EXPLOSION1;
+                    else
+                        datosGuia[posicionX][posicionY+1] = TipoFabrica.MUNDO3;
+                    
+                    if (revisarDanhos(posicionX+1, posicionY+1))
+                        datosGuia[posicionX+1][posicionY+1] = TipoFabrica.EXPLOSION1;
+                    else
+                        datosGuia[posicionX+1][posicionY+1] = TipoFabrica.MUNDO4;
+                }
+                else if (noVisitado[i] instanceof Templo){
+                    Templo elementoPintar = (Templo)noVisitado[i];
+                    if (elementoPintar.getOrientacionFabrica() == Orientacion.Horizontal){
+                        datosGuia[posicionX][posicionY] = TipoFabrica.TEMPLOH1;
+                        
+                        if (revisarDanhos(posicionX+1, posicionY))
+                            datosGuia[posicionX+1][posicionY] = TipoFabrica.EXPLOSION1;
+                        else
+                            datosGuia[posicionX+1][posicionY] = TipoFabrica.TEMPLOH2;
+                    }
+                    else if (elementoPintar.getOrientacionFabrica() == Orientacion.Vertical){
+                        datosGuia[posicionX][posicionY] = TipoFabrica.TEMPLOV1;
+                        
+                        if (revisarDanhos(posicionX, posicionY+1))
+                            datosGuia[posicionX][posicionY+1] = TipoFabrica.EXPLOSION1;
+                        else
+                            datosGuia[posicionX][posicionY+1] = TipoFabrica.TEMPLOV2;
+                    }
+                }
+                else if (noVisitado[i] instanceof Mercado){
+                    Mercado elementoPintar = (Mercado)noVisitado[i];
+                    if (elementoPintar.getOrientacionFabrica() == Orientacion.Horizontal){
+                        datosGuia[posicionX][posicionY] = TipoFabrica.MERCADOH1;
+                        
+                        if (revisarDanhos(posicionX+1, posicionY))
+                            datosGuia[posicionX+1][posicionY] = TipoFabrica.EXPLOSION1;
+                        else
+                            datosGuia[posicionX+1][posicionY] = TipoFabrica.MERCADOH2;
+                    }
+                    else if (elementoPintar.getOrientacionFabrica() == Orientacion.Vertical){
+                        datosGuia[posicionX][posicionY] = TipoFabrica.MERCADOV1;
+                        
+                        if (revisarDanhos(posicionX, posicionY+1))
+                            datosGuia[posicionX][posicionY+1] = TipoFabrica.EXPLOSION1;
+                        else
+                            datosGuia[posicionX][posicionY+1] = TipoFabrica.MERCADOV2;
+                    }
+                }
+            }
+        }
+        
+        return datosGuia;
+    }
+    
+    public boolean revisarDanhos(int x, int y){
+        
+        for (int i = 0; i < danhos.size(); i++){
+            if (danhos.get(i).getX() == x && danhos.get(i).getY() == y){
+                //Hay daño entonces lo indico
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean buscarMina(){
+        for (int i = 0; i < cantidadVertices; i++){
+            if (vertices[i] != null && vertices[i] instanceof Mina){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean buscarArmeria(){
+        for (int i = 0; i < cantidadVertices; i++){
+            if (vertices[i] != null && vertices[i] instanceof Armeria){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean buscarMercado(){
+        for (int i = 0; i < cantidadVertices; i++){
+            if (vertices[i] != null && vertices[i] instanceof Mercado){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean buscarTemplo(){
+        for (int i = 0; i < cantidadVertices; i++){
+            if (vertices[i] != null && vertices[i] instanceof Templo){
+                return true;
+            }
+        }
+        return false;
+    }
 }

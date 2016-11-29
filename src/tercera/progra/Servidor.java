@@ -8,6 +8,8 @@ package tercera.progra;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
 
@@ -97,6 +99,12 @@ public class Servidor extends Thread{
      */
     public void correrServidor(){
         this.activarServidor();
+        try {
+            //nuevo servidor
+            this.serverSocket = new ServerSocket(5000);
+        } catch (IOException ex) {
+            Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+        }
         this.start();
     }
 
@@ -135,8 +143,10 @@ public class Servidor extends Thread{
     public String getLogs() {
         return logs;
     }
-    
-    
+
+    public ServerSocket getServerSocket() {
+        return serverSocket;
+    }
     
     /**
      * Este método es el método que controla el servidor, lo que hace este método es que controla todas las nuevas conexiones
@@ -145,8 +155,6 @@ public class Servidor extends Thread{
     @Override
     public void run(){
         try{
-            //nuevo servidor
-            this.serverSocket = new ServerSocket(5000);
             //que esté corriendo mientras el servidor esté activo
             while(this.activo){
                 System.out.println("Servidor en espera por una nueva conexión");
@@ -192,14 +200,24 @@ public class Servidor extends Thread{
             switch(mensajeAAtender.getTipoDelMensaje()){
                 case actualizarTablas:{
                     System.out.println("Se desea actualizar las tablas de cada jugador");
-                    mensajeAAtender.setDatoDeRespuesta(this.partidasEnCurso);
-                    this.enviarMensaje(mensajeAAtender, this.flujoDeSalida);
+                    mensajeAAtender.setDatoDeRespuesta(this.encontrarPartidaDelJugador((Jugador)mensajeAAtender.getDatoDeSolicitud()));
+                    try{
+                        this.flujoDeSalida.writeObject(mensajeAAtender);
+                        System.out.println("Mensaje enviado de vuelta correctamente");
+                    } catch (IOException ex) {
+                        Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                     break;
                 }
                 case activado:{
                     System.out.println("Se desea averiguar si el servidor está activo");
                     mensajeAAtender.setDatoDeRespuesta(true);
-                    this.enviarMensaje(mensajeAAtender, this.flujoDeSalida);
+                    try{
+                        this.flujoDeSalida.writeObject(mensajeAAtender);
+                        System.out.println("Mensaje enviado de vuelta correctamente");
+                    } catch (IOException ex) {
+                        Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                     break;
                 }
                 case atacarJugador:{
@@ -215,32 +233,54 @@ public class Servidor extends Thread{
                         System.out.println("No se agregaron correctamente los daños");
                     }
                     mensajeAAtender.setDatoDeRespuesta(resultado);
-                    this.enviarMensaje(mensajeAAtender, this.flujoDeSalida);
+                    try{
+                        this.flujoDeSalida.writeObject(mensajeAAtender);
+                        System.out.println("Mensaje enviado de vuelta correctamente");
+                    } catch (IOException ex) {
+                        Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                     break;
                 }
                 case unirseACola:{
-                    Jugador posibleNuevoJugador = (Jugador)mensajeAAtender.getDatoDeSolicitud();
-                    
+                    System.out.println("Se desea unirse a una cola");
+                    ArrayList <Object> datosMensaje= (ArrayList<Object>)mensajeAAtender.getDatoDeSolicitud();
+                    Jugador posibleNuevoJugador = (Jugador)datosMensaje.get(0);
                     if(this.encontrarPartidaDelJugador(posibleNuevoJugador) == null){//primero verifico si no estaba en otra partida
-                        switch((int)mensajeAAtender.getDatoDeSolicitud()){
+                        System.out.println("El jugador no estaba en partida");
+                        switch((int)datosMensaje.get(1)){
                             case 2:{
                                 this.jugadoresEsperaDuo.add(posibleNuevoJugador);
                                 if(this.jugadoresEsperaDuo.size() >= 2){
-                                    emparejar(2);
+                                    System.out.println("Hay suficientes jugadores en la cola: " + 2);
+                                    ArrayList<Jugador> jugadoresAEmparejar = new ArrayList<>();
+                                    for (int i = 0; i < 2; i++) {
+                                        Jugador jugadorAEmparejar = this.jugadoresEsperaDuo.remove(0);
+                                        jugadorAEmparejar.setNumeroJugador(i);
+                                        jugadoresAEmparejar.add(jugadorAEmparejar);
+                                    }
+                                    boolean resultado = this.partidasEnCurso.add(new Partida(jugadoresAEmparejar));
+                                    if(resultado){
+                                        this.notificarUsuariosPartida(this.partidasEnCurso.get(this.partidasEnCurso.size()-1));
+                                    }
+                                    System.out.println("Emparejados");
                                 }
                                 break;
                             }
                             case 3:{
                                 this.jugadoresEsperaTrio.add(posibleNuevoJugador);
                                 if(this.jugadoresEsperaTrio.size() >= 3){
+                                    System.out.println("Hay suficientes jugadores en la cola: " + 3);
                                     emparejar(3);
+                                    System.out.println("Emparejados");
                                 }
                                 break;
                             }
                             case 4:{
                                 this.jugadoresEsperaCuarteto.add(posibleNuevoJugador);
                                 if(this.jugadoresEsperaCuarteto.size() >= 4){
+                                    System.out.println("Hay suficientes jugadores en la cola: " + 4);
                                     emparejar(4);
+                                    System.out.println("Emparejados");
                                 }
                                 break;
                             }
@@ -250,7 +290,72 @@ public class Servidor extends Thread{
                     else{
                         mensajeAAtender.setDatoDeRespuesta(false);
                     }
-                    this.enviarMensaje(mensajeAAtender, this.flujoDeSalida);
+                    System.out.println("Enviando mensaje de vuelta");
+                    try{
+                        this.flujoDeSalida.writeObject(mensajeAAtender);
+                        System.out.println("Mensaje enviado de vuelta correctamente");
+                    } catch (IOException ex) {
+                        Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    break;
+                }
+                case nuevaArma:{
+                    System.out.println("Se desea agregar una nueva arma");
+                    ArrayList <Object> datosMensaje = (ArrayList<Object>)mensajeAAtender.getDatoDeSolicitud();
+                    Partida partidaAModificar = this.encontrarPartidaDelJugador((Jugador)datosMensaje.get(0));
+                    Arma armaAAgregar = (Arma)datosMensaje.get(1);
+                    System.out.println("Agregando Arma");
+                    boolean resultado = partidaAModificar.getJugadores().get(partidaAModificar.getJugadores().indexOf((Jugador)datosMensaje.get(0))).agregarArma(armaAAgregar);
+                    if(resultado){
+                        System.out.println("Agregado Correcto");
+                    }
+                    else{
+                        System.out.println("Agregado Incorrecto");
+                    }
+                    mensajeAAtender.setDatoDeRespuesta(resultado);
+                    try{
+                        this.flujoDeSalida.writeObject(mensajeAAtender);
+                        System.out.println("Mensaje enviado de vuelta correctamente");
+                    } catch (IOException ex) {
+                        Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    break;
+                }
+                case nuevoElemento:{
+                    System.out.println("Se desea agregar un nuevo elemento");
+                    ArrayList <Object> datosMensaje = (ArrayList<Object>)mensajeAAtender.getDatoDeSolicitud();
+                    Partida partidaAModificar = this.encontrarPartidaDelJugador((Jugador)datosMensaje.get(0));
+                    Elemento elementoAAgregar = (Elemento)datosMensaje.get(1);
+                    if(elementoAAgregar instanceof Fabrica){
+                        System.out.println("Fábrica");
+                    }
+                    else{
+                        System.out.println("Elemento");
+                    }
+                    mensajeAAtender.setDatoDeRespuesta(false);
+                    try{
+                        this.flujoDeSalida.writeObject(mensajeAAtender);
+                        System.out.println("Mensaje enviado de vuelta correctamente");
+                    } catch (IOException ex) {
+                        Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    break;
+                }
+                case enviarMensaje:{
+                    System.out.println("Se desea enviar un mensaje de chat");
+                    ArrayList <Object> datosMensaje = (ArrayList<Object>)mensajeAAtender.getDatoDeSolicitud();
+                    ArrayList <Jugador> jugadoresAEnviarMensaje = (ArrayList<Jugador>)datosMensaje.get(0);
+                    for (int i = 0; i < jugadoresAEnviarMensaje.size(); i++) {
+                        Jugador get = jugadoresAEnviarMensaje.get(i); 
+                        try {
+                            OutputStream conexionSalidaSocket = new Socket(get.getIP(),5001).getOutputStream();
+                            ObjectOutputStream canalEscritura = new ObjectOutputStream(conexionSalidaSocket);
+                            canalEscritura.writeObject(new Mensaje(TipoMensaje.notificarJugadores, null));
+                            System.out.println("Mensaje enviado de vuelta correctamente");
+                        } catch (IOException ex) {
+                            Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
                 }
             }
         }catch(ClassCastException exc){
@@ -291,7 +396,11 @@ public class Servidor extends Thread{
                 break;
             }
         }
-        return this.partidasEnCurso.add(new Partida(jugadoresAEmparejar));
+        boolean resultado = this.partidasEnCurso.add(new Partida(jugadoresAEmparejar));
+        if(resultado){
+            this.notificarUsuariosPartida(this.partidasEnCurso.get(this.partidasEnCurso.size()-1));
+        }
+        return resultado;
     }
     
     /**
@@ -320,20 +429,14 @@ public class Servidor extends Thread{
     public void notificarUsuariosPartida(Partida partidaANotificar){
         for (int i = 0; i < partidaANotificar.getJugadores().size(); i++) {
             Jugador get = partidaANotificar.getJugadores().get(i);
-            this.enviarMensaje(new Mensaje(TipoMensaje.notificarJugadores, null), get.getFlujoDeSalida());
-        }
-    }
-    
-    /**
-     * Este es el método encargado de enviar un mensaje a alguno de los jugadores
-     * @param mensajeAEnviar El mensaje que se desea enviar
-     */
-    private void enviarMensaje(Mensaje mensajeAEnviar, ObjectOutputStream canalEscritura){
-        try {
-            canalEscritura.writeObject(mensajeAEnviar);
-            System.out.println("Mensaje enviado de vuelta correctamente");
-        } catch (IOException ex) {
-            System.out.println("Error al enviar el mensaje de vuelta");
+            try {
+                OutputStream conexionSalidaSocket = new Socket(get.getIP(),5001).getOutputStream();
+                ObjectOutputStream canalEscritura = new ObjectOutputStream(conexionSalidaSocket);
+                canalEscritura.writeObject(new Mensaje(TipoMensaje.notificarJugadores, null));
+                System.out.println("Mensaje enviado de vuelta correctamente");
+            } catch (IOException ex) {
+                Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
     
