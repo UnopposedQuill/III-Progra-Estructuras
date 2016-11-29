@@ -1,4 +1,4 @@
-package Fabricas;
+package tercera.progra;
 
 /*
  * To change this license header, choose License Headers in Project Properties.

@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Fabricas;
+package tercera.progra;
 
 /**
  *
  * @author esteban
  */
-public class Armería extends Fabrica{
+public class Armeria extends Fabrica{
 
-    public Armería(Orientacion orientacionFabrica, int posicionX, int posicionY) {
+    public Armeria(Orientacion orientacionFabrica, int posicionX, int posicionY) {
         super(orientacionFabrica, posicionX, posicionY);
     }
     

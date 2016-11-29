@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Fabricas;
+package tercera.progra;
 
 import java.util.*;
 
@@ -29,6 +29,12 @@ public class Conector extends Elemento{
         this.mundoPropio = mundo;
     }
 
+    public Conector(int posicionX, int posicionY) {
+        super(posicionX, posicionY);
+        conexiones = new HashSet<>();
+        mundoPropio = null;
+    }
+    
     /**
      * Retorna un HashSet con las conexiones que posee el conector
      * @return Un HashSet conteniendo referencias a fábricas con las que el conector está conectado
