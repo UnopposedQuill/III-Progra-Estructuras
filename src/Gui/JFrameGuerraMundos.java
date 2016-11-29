@@ -95,7 +95,7 @@ public class JFrameGuerraMundos extends JFrame {
                             datos[i][j] = botonARenderizar;
                             break;
                         }
-                        case MINA:{
+                        case MINAH1:{
                             //le seteo la imagen al botón
                             botonARenderizar.setIcon(iconoCirculo);
                             //lo ingreso en la tabla
