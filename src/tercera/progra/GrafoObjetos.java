@@ -95,6 +95,31 @@ public class GrafoObjetos {
         }
         return cantidadConexiones;
     }
+   
+    /**
+     * Visita todos los que están conectados a un componente en específico
+     * En este caso el componenente será un mundo
+     * @param desde
+     * @return 
+     */
+    public int visitarConectados (Elemento desde){
+        int cantidadConexiones = 0;
+        int desdeLogico = desde.getPosicionGrafo();
+        //Me aseguro de que existen los vertices
+        if (vertices[desdeLogico] != null){
+            for (int i = 0; i < cantidadVertices; i++){
+                if(matrizAdyacencia[desdeLogico][i] != 0){
+                    cantidadConexiones++;
+                    visitados[i] = true;
+                }
+            }
+            if (vertices[desdeLogico] instanceof Conector){
+                //Encontré un conector, llamada recursiva
+                visitarConectados ((Elemento) vertices[desdeLogico]);
+            }
+        }
+        return cantidadConexiones;
+    }
     
     public int visitarAdyacentesMismoTipo (Object tipo){
         int cantidadConexiones = 0;
@@ -133,7 +158,11 @@ public class GrafoObjetos {
             visitados[i] = false;
         }
     }
-    
+    /**
+     * Obtiene el elemento según el índice deen la matriz de vectores
+     * @param indice
+     * @return 
+     */
     public Elemento obtenerElementoIndice (int indice){
         return (Elemento)vertices[indice];
     }
@@ -155,7 +184,15 @@ public class GrafoObjetos {
                     Armeria elementoPintar = (Armeria)vertices[i];
                     posicionX = elementoPintar.getPosicionX();
                     posicionY = elementoPintar.getPosicionY();
-                    datosGuia[posicionX][posicionY] = TipoFabrica.ARMERIA;
+                    if (elementoPintar.getOrientacionFabrica() == Orientacion.Horizontal){
+                        datosGuia[posicionX][posicionY] = TipoFabrica.ARMERIAH1;
+                        datosGuia[posicionX+1][posicionY] = TipoFabrica.ARMERIAH2;
+                    }
+                    else if (elementoPintar.getOrientacionFabrica() == Orientacion.Vertical){
+                        datosGuia[posicionX][posicionY] = TipoFabrica.ARMERIAV1;
+                        datosGuia[posicionX][posicionY+1] = TipoFabrica.ARMERIAV2;
+                    }
+                    
                 }
                 else if (vertices[i] instanceof Conector){
                     Conector elementoPintar = (Conector)vertices[i];
@@ -167,25 +204,49 @@ public class GrafoObjetos {
                     Mina elementoPintar = (Mina)vertices[i];
                     posicionX = elementoPintar.getPosicionX();
                     posicionY = elementoPintar.getPosicionY();
-                    datosGuia[posicionX][posicionY] = TipoFabrica.MINA;
+                    if (elementoPintar.getOrientacionFabrica() == Orientacion.Horizontal){
+                        datosGuia[posicionX][posicionY] = TipoFabrica.MINAH1;
+                        datosGuia[posicionX+1][posicionY] = TipoFabrica.MINAH2;
+                    }
+                    else if (elementoPintar.getOrientacionFabrica() == Orientacion.Vertical){
+                        datosGuia[posicionX][posicionY] = TipoFabrica.MINAV1;
+                        datosGuia[posicionX][posicionY+1] = TipoFabrica.MINAV2;
+                    }
                 }
                 else if (vertices[i] instanceof Mundo){
                     Mundo elementoPintar = (Mundo)vertices[i];
                     posicionX = elementoPintar.getPosicionX();
                     posicionY = elementoPintar.getPosicionY();
-                    datosGuia[posicionX][posicionY] = TipoFabrica.MUNDO;
+                    datosGuia[posicionX][posicionY] = TipoFabrica.MUNDO1;
+                    datosGuia[posicionX+1][posicionY] = TipoFabrica.MUNDO2;
+                    datosGuia[posicionX][posicionY+1] = TipoFabrica.MUNDO3;
+                    datosGuia[posicionX+1][posicionY+1] = TipoFabrica.MUNDO4;
                 }
                 else if (vertices[i] instanceof Templo){
                     Templo elementoPintar = (Templo)vertices[i];
                     posicionX = elementoPintar.getPosicionX();
                     posicionY = elementoPintar.getPosicionY();
-                    datosGuia[posicionX][posicionY] = TipoFabrica.TEMPLO;
+                    if (elementoPintar.getOrientacionFabrica() == Orientacion.Horizontal){
+                        datosGuia[posicionX][posicionY] = TipoFabrica.TEMPLOH1;
+                        datosGuia[posicionX+1][posicionY] = TipoFabrica.TEMPLOH2;
+                    }
+                    else if (elementoPintar.getOrientacionFabrica() == Orientacion.Vertical){
+                        datosGuia[posicionX][posicionY] = TipoFabrica.TEMPLOV1;
+                        datosGuia[posicionX][posicionY+1] = TipoFabrica.TEMPLOV2;
+                    }
                 }
                 else if (vertices[i] instanceof Mercado){
                     Mercado elementoPintar = (Mercado)vertices[i];
                     posicionX = elementoPintar.getPosicionX();
                     posicionY = elementoPintar.getPosicionY();
-                    datosGuia[posicionX][posicionY] = TipoFabrica.MERCADO;
+                    if (elementoPintar.getOrientacionFabrica() == Orientacion.Horizontal){
+                        datosGuia[posicionX][posicionY] = TipoFabrica.MERCADOH1;
+                        datosGuia[posicionX+1][posicionY] = TipoFabrica.MERCADOH2;
+                    }
+                    else if (elementoPintar.getOrientacionFabrica() == Orientacion.Vertical){
+                        datosGuia[posicionX][posicionY] = TipoFabrica.MERCADOV1;
+                        datosGuia[posicionX][posicionY+1] = TipoFabrica.MERCADOV2;
+                    }
                 }
             }
         }
