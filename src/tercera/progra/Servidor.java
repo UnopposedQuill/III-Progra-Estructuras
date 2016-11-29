@@ -225,12 +225,18 @@ public class Servidor extends Thread{
                     Ataque ataque = (Ataque)mensajeAAtender.getDatoDeSolicitud();
                     Partida partidaAModificar = this.encontrarPartidaDelJugador(ataque.getBlancoDelAtaque());
                     System.out.println("Se consiguieron correctamente los datos del ataque");
-                    boolean resultado = partidaAModificar.getJugadores().get(partidaAModificar.getJugadores().indexOf(ataque.getBlancoDelAtaque())).getGrafoPropio().agregarDanhos(ataque.getCoordenadaDeAtaque());
-                    if(resultado){
+                    int resultado = partidaAModificar.getJugadores().get(partidaAModificar.getJugadores().indexOf(ataque.getBlancoDelAtaque())).getGrafoPropio().agregarDanhos(ataque.getCoordenadaDeAtaque());
+                    if(resultado == 1){
                         System.out.println("Se agregaron los daños correctamente");
                     }
-                    else{
+                    else if (resultado == 0){
                         System.out.println("No se agregaron correctamente los daños");
+                    }
+                    else if (resultado == 2){
+                        System.out.println("Se agregaron los daños correctamente y pegó en un agujero negro");
+                    }
+                    else if (resultado == 3){
+                        System.out.println("No se agregaron correctamente los daños pero se pegó en un agujero negro");
                     }
                     mensajeAAtender.setDatoDeRespuesta(resultado);
                     try{
