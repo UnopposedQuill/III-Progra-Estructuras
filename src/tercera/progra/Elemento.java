@@ -10,17 +10,7 @@ package tercera.progra;
  * rendir código, los que importan son los que heredan de este
  * @author esteban
  */
-public abstract class Elemento {
-    
-    /**
-     * La posición X será la fila donde se ubica el cuadro más alto
-     */
-    protected int posicionX;
-    
-    /**
-     * La posicón Y será la columna donde se ubica el cuadro más a la izquierda
-     */
-    protected int posicionY;
+public abstract class Elemento implements java.io.Serializable{
 
     /**
      * La posicion del objeto en el grafo
@@ -30,24 +20,21 @@ public abstract class Elemento {
     protected Coordenada coordenadas;
     
     public Elemento(int posicionX, int posicionY) {
-        this.posicionX = posicionX;
-        this.posicionY = posicionY;
         posicionGrafo = 0;
         coordenadas = new Coordenada(posicionX, posicionY);
     }
     
     public Elemento(int posicionX, int posicionY, int posicionGrafo) {
-        this.posicionX = posicionX;
-        this.posicionY = posicionY;
+        this.coordenadas = new Coordenada(posicionX, posicionY);
         this.posicionGrafo = posicionGrafo;
     }
     
     public int getPosicionX() {
-        return posicionX;
+        return this.coordenadas.getX();
     }
 
     public int getPosicionY() {
-        return posicionY;
+        return this.coordenadas.getY();
     }
 
     public int getPosicionGrafo() {

@@ -291,13 +291,14 @@
     <Component class="javax.swing.JComboBox" name="TipoFabricaComprar">
       <Properties>
         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-          <StringArray count="6">
+          <StringArray count="7">
             <StringItem index="0" value="Armeria"/>
-            <StringItem index="1" value="Comodin"/>
-            <StringItem index="2" value="Mina"/>
-            <StringItem index="3" value="Mercado"/>
+            <StringItem index="1" value="Mina"/>
+            <StringItem index="2" value="Mercado"/>
+            <StringItem index="3" value="Templo"/>
             <StringItem index="4" value="Mundo"/>
-            <StringItem index="5" value="Templo"/>
+            <StringItem index="5" value="Conector"/>
+            <StringItem index="6" value="Comodin"/>
           </StringArray>
         </Property>
       </Properties>

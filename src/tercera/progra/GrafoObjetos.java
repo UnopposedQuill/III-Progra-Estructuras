@@ -19,6 +19,8 @@ public class GrafoObjetos implements Serializable{
     private int[][] matrizAdyacencia;
     private boolean[] visitados;
     private ArrayList<Coordenada> danhos;
+    private ArrayList<Elemento> componentesExplotar;
+    private int isDanhable;
     
     /**
      * 
@@ -29,7 +31,7 @@ public class GrafoObjetos implements Serializable{
         matrizAdyacencia = new int[cantidadVertices][cantidadVertices];
         vertices = new Elemento[cantidadVertices];
         visitados = new boolean[cantidadVertices];
-        
+        componentesExplotar = new ArrayList();
         for (int i = 0; i < cantidadVertices; i++){
             vertices[i] = null;
             visitados[i] = false;
@@ -40,6 +42,20 @@ public class GrafoObjetos implements Serializable{
         this.danhos = new ArrayList<>();
     }
 
+    public void reducirDanhable(){
+        if(this.isDanhable > 0){
+            this.isDanhable--;
+        }
+    }
+    
+    public boolean isDanhable(){
+        return this.isDanhable != 0;
+    }
+
+    public void setIsDanhable(int isDanhable) {
+        this.isDanhable = isDanhable;
+    }
+    
     public ArrayList<Coordenada> getDanhos() {
         return danhos;
     }
@@ -140,6 +156,59 @@ public class GrafoObjetos implements Serializable{
             }
         }
         return false;
+    }
+    /**
+     * Recibe los X y  Y y busca un conector en esas posiciones para realizar la conexion
+     * @param desde
+     * @param posicionX
+     * @param posicionY
+     * @return 
+     */
+    public boolean agregarNuevaConexionConectorXY (Elemento desde, int posicionX, int posicionY){
+        //Me aseguro de que existen los vertices
+        int desdeLogico = desde.getPosicionGrafo();
+        Conector encontrado = obtenerConectorXY(posicionX, posicionY);
+        if (vertices[desdeLogico] != null && encontrado != null){
+            return agregarNuevaConexion (vertices[desdeLogico], encontrado, 0);
+        }
+        return false;
+    }
+    /**
+     * Conexion de un componente a otro
+     * @param desde
+     * @param posicionX
+     * @param posicionY
+     * @return 
+     */
+    public boolean agregarNuevaConexionXY (Elemento desde, int posicionX, int posicionY){
+        //Me aseguro de que existen los vertices
+        int desdeLogico = desde.getPosicionGrafo();
+        Elemento encontrado = obtenerXY(posicionX, posicionY);
+        if (vertices[desdeLogico] != null && encontrado != null){
+            return agregarNuevaConexion (vertices[desdeLogico], encontrado, 0);
+        }
+        return false;
+    }
+    public Conector obtenerConectorXY(int posicionX, int posicionY){
+        Coordenada coordenada = new Coordenada (posicionX, posicionY);
+        for (int i = 0; i < cantidadVertices; i++){
+            if (vertices[i].getCoordenadas().equals(coordenada)){
+                if (vertices[i] instanceof Conector)
+                    return (Conector) vertices[i];
+                else
+                    return null;
+            } 
+        }
+        return null;
+    }
+    public Elemento obtenerXY(int posicionX, int posicionY){
+        Coordenada coordenada = new Coordenada (posicionX, posicionY);
+        for (int i = 0; i < cantidadVertices; i++){
+            if (vertices[i].getCoordenadas().equals(coordenada)){
+                return vertices[i];
+            } 
+        }
+        return null;
     }
     /**
      * Revisa las conexiones del elemento
@@ -280,6 +349,32 @@ public class GrafoObjetos implements Serializable{
      */
     public Elemento obtenerElementoIndice (int indice){
         return (Elemento)vertices[indice];
+    }
+    
+    public ArrayList<Conector> obtenerConectoresDisponibles(){
+        ArrayList<Conector> conectores = new ArrayList<>();
+        Conector conectorEncontrado;
+        //Busco un mundo para empezar a visitar
+        for (int i = 0; i < cantidadVertices; i++){
+            if (vertices[i] instanceof Conector){
+                conectorEncontrado = (Conector)vertices[i];
+                conectores.add(conectorEncontrado);
+            } 
+        }
+        return conectores;
+    }
+    
+    public ArrayList<Mundo> obtenerMundosDisponibles(){
+        ArrayList<Mundo> conectores = new ArrayList<>();
+        Mundo mundoEncontrado;
+        //Busco un mundo para empezar a visitar
+        for (int i = 0; i < cantidadVertices; i++){
+            if (vertices[i] instanceof Mundo){
+                mundoEncontrado = (Mundo)vertices[i];
+                conectores.add(mundoEncontrado);
+            } 
+        }
+        return conectores;
     }
     
     /**
@@ -644,7 +739,6 @@ public class GrafoObjetos implements Serializable{
                 }
             }
         }
-        
         return datosGuia;
     }
     

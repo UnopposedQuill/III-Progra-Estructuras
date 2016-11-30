@@ -21,10 +21,10 @@ public class Servidor extends Thread{
     
     private boolean activo;
     private boolean pausado;
+    private int contador = 0;
     private ArrayList<Partida> partidasEnCurso;
     private ArrayList<Jugador> jugadoresEsperaDuo,jugadoresEsperaTrio,jugadoresEsperaCuarteto;
     private String logs;
-    
     //Campos de las conexiones del servidor
     private ServerSocket serverSocket;
     private OutputStream conexionSalida;
@@ -225,24 +225,30 @@ public class Servidor extends Thread{
                     Ataque ataque = (Ataque)mensajeAAtender.getDatoDeSolicitud();
                     Partida partidaAModificar = this.encontrarPartidaDelJugador(ataque.getBlancoDelAtaque());
                     System.out.println("Se consiguieron correctamente los datos del ataque");
-                    int resultado = partidaAModificar.getJugadores().get(partidaAModificar.getJugadores().indexOf(ataque.getBlancoDelAtaque())).getGrafoPropio().agregarDanhos(ataque.getCoordenadaDeAtaque());
-                    switch (resultado) {
-                        case 1:
-                            System.out.println("Se agregaron los daños correctamente");
-                            break;
-                        case 0:
-                            System.out.println("No se agregaron correctamente los daños");
-                            break;
-                        case 2:
-                            System.out.println("Se agregaron los daños correctamente y pegó en un agujero negro");
-                            break;
-                        case 3:
-                            System.out.println("No se agregaron correctamente los daños pero se pegó en un agujero negro");
-                            break;
-                        default:
-                            break;
+                    if(ataque.getBlancoDelAtaque().getGrafoPropio().isDanhable()){
+                        int resultado = partidaAModificar.getJugadores().get(partidaAModificar.getJugadores().indexOf(ataque.getBlancoDelAtaque())).getGrafoPropio().agregarDanhos(ataque.getCoordenadaDeAtaque());
+                        switch (resultado) {
+                            case 1:
+                                System.out.println("Se agregaron los daños correctamente");
+                                break;
+                            case 0:
+                                System.out.println("No se agregaron correctamente los daños");
+                                break;
+                            case 2:
+                                System.out.println("Se agregaron los daños correctamente y pegó en un agujero negro");
+                                break;
+                            case 3:
+                                System.out.println("No se agregaron correctamente los daños pero se pegó en un agujero negro");
+                                break;
+                            default:
+                                break;
+                        }
+                        mensajeAAtender.setDatoDeRespuesta(resultado);
                     }
-                    mensajeAAtender.setDatoDeRespuesta(resultado);
+                    else{
+                        ataque.getBlancoDelAtaque().getGrafoPropio().reducirDanhable();
+                        mensajeAAtender.setDatoDeRespuesta(false);
+                    }
                     try{
                         this.flujoDeSalida.writeObject(mensajeAAtender);
                         System.out.println("Mensaje enviado de vuelta correctamente");
@@ -336,12 +342,38 @@ public class Servidor extends Thread{
                     ArrayList <Object> datosMensaje = (ArrayList<Object>)mensajeAAtender.getDatoDeSolicitud();
                     Partida partidaAModificar = this.encontrarPartidaDelJugador((Jugador)datosMensaje.get(0));
                     Jugador jugadorAModificar = partidaAModificar.getJugadores().get(partidaAModificar.getJugadores().indexOf((Jugador)datosMensaje.get(0)));
+                    if(datosMensaje.get(1) instanceof Comodin){
+                        if(jugadorAModificar.getGrafoPropio().buscarTemplo()){
+                            if(jugadorAModificar.getGrafoPropio().isDanhable()){
+                                Comodin comodinAAplicar = (Comodin)datosMensaje.get(1);
+                                jugadorAModificar.getGrafoPropio().setIsDanhable(comodinAAplicar.getGolpesRestantes());
+                                mensajeAAtender.setDatoDeRespuesta(true);
+                                try{
+                                    this.flujoDeSalida.writeObject(mensajeAAtender);
+                                    System.out.println("Mensaje enviado de vuelta correctamente");    
+                                } catch (IOException ex) {
+                                    Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                                return;
+                            }
+                        }
+                        mensajeAAtender.setDatoDeRespuesta(false);
+                        try{
+                            this.flujoDeSalida.writeObject(mensajeAAtender);
+                            System.out.println("Mensaje enviado de vuelta correctamente");
+                        } catch (IOException ex) {
+                            Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        return;
+                    }
                     Elemento elementoAAgregar = (Elemento)datosMensaje.get(1);
+                    Coordenada posicionConector = (Coordenada)datosMensaje.get(2);
                     if(elementoAAgregar instanceof Fabrica){
                         System.out.println("Fábrica");
                         mensajeAAtender.setDatoDeRespuesta(false);
                     }
                     else{
+                        
                         System.out.println("Elemento");
                         jugadorAModificar.getGrafoPropio().agregarNuevoVertice(elementoAAgregar);
                         mensajeAAtender.setDatoDeRespuesta(true);
@@ -370,6 +402,18 @@ public class Servidor extends Thread{
                             Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
+                    break;
+                }
+                case obtenerPuertoServer: {
+                     mensajeAAtender.setDatoDeRespuesta(this.contador);
+                     this.contador++;
+                     try{
+                        this.flujoDeSalida.writeUnshared(mensajeAAtender);
+                        System.out.println("Mensaje enviado de vuelta correctamente");
+                    } catch (IOException ex) {
+                        Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    break;
                 }
             }
         }catch(ClassCastException exc){

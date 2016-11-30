@@ -13,7 +13,8 @@ import java.io.Serializable;
  */
 public enum TipoMensaje implements Serializable{
     atacarJugador, actualizarTablas, enviarMensaje, unirseACola, activado,
-    notificarJugadores, intercambio, nuevoElemento, nuevaArma, emparejado;
+    notificarJugadores, intercambio, nuevoElemento, nuevaArma, emparejado,
+    obtenerPuertoServer;
     
     public String getRepString(){
         switch(this){

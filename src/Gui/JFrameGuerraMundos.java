@@ -36,7 +36,7 @@ public class JFrameGuerraMundos extends JFrame implements java.io.Serializable{
         
         String nombreJugador = JOptionPane.showInputDialog("Inserte el nombre del jugador");
         String IP = JOptionPane.showInputDialog("Inserte el IP del servidor");
-        this.jugadorPropio = new Jugador(nombreJugador, grafo, IP);
+        this.jugadorPropio = new Jugador(nombreJugador, grafo, IP, 1300);
         boolean offline = !(boolean)(this.jugadorPropio.realizarPeticion(new Mensaje(TipoMensaje.activado, null)).getDatoDeRespuesta());
         this.Desconectado.setVisible(offline);
         this.cambiarHost.setVisible(offline);
@@ -169,6 +169,7 @@ public class JFrameGuerraMundos extends JFrame implements java.io.Serializable{
                     //significa que sí dio en el botón, por lo que hago que dibuje el mapa
                     //ingresar aquí lo que se desea que suceda al presionar uno de los botones
                     System.out.println("Se presionó el botón en la posición: " + fila + ", " + columna);
+                    
                 }
             }
         });
@@ -261,7 +262,7 @@ public class JFrameGuerraMundos extends JFrame implements java.io.Serializable{
 
         LabelTurno.setText("Turno del Jugador: Jugador 1");
 
-        TipoFabricaComprar.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Armeria", "Comodin", "Mina", "Mercado", "Mundo", "Templo" }));
+        TipoFabricaComprar.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Armeria", "Mina", "Mercado", "Templo", "Mundo", "Conector", "Comodin" }));
 
         FabricaComprar.setText("Comprar");
         FabricaComprar.addActionListener(new java.awt.event.ActionListener() {
@@ -477,27 +478,84 @@ public class JFrameGuerraMundos extends JFrame implements java.io.Serializable{
             if((TipoFabrica)datosTabla[xSeleccionado][ySeleccionado] == TipoFabrica.BLANK){
                 ArrayList <Object> datosAEnviar = new ArrayList<>();
                 datosAEnviar.add(this.jugadorPropio);
+                Conector conector = null;
+                Orientacion orientacionFabrica = Orientacion.NoDefinido;
+                if(this.TipoFabricaComprar.getSelectedIndex() < 5){
+                    conector = (Conector)JOptionPane.showInputDialog(null, "Elija un conector",
+                                "Conectar Elemento", JOptionPane.QUESTION_MESSAGE, null,
+                                this.jugadorPropio.getGrafoPropio().obtenerConectoresDisponibles().toArray(), 0);
+                    orientacionFabrica = (Orientacion)JOptionPane.showInputDialog(null, "Elija la orientación de la fábrica",
+                                "Orientación de la Fábrica", JOptionPane.QUESTION_MESSAGE, null,
+                                Orientacion.values(), 0);
+                }
                 switch(this.TipoFabricaComprar.getSelectedIndex()){                    
                     case 0:{
                         //Armeria
-                        //Genero  elGenero = (Genero) JOptionPane.showInputDialog(null, "Genero", "titulo", 
-                        //                JOptionPane.QUESTION_MESSAGE, null, 
-                        //               Genero.values(), 0);
+                        Armeria armeria = new Armeria(orientacionFabrica, xSeleccionado, ySeleccionado);
+                        datosAEnviar.add(armeria);
+                        datosAEnviar.add(conector.getCoordenadas());
+                        break;
                     }
                     case 1:{
-                        //Comodin
+                        //Mina
+                        int cantidadAcero = 0;
+                        int cadenciaAcero = 0;
+                        while(true){
+                            try{
+                                cantidadAcero = Integer.parseInt((String)JOptionPane.showInputDialog("Seleccione la cantidad de acero que hará la mina", 50));
+                                cadenciaAcero = Integer.parseInt(JOptionPane.showInputDialog("Seleccione la cantidad de tiempo que le tomará hacerlos (segundos)", 60));
+                                break;
+                            }catch(NullPointerException | NumberFormatException exc){
+                                JOptionPane.showMessageDialog(null, "Ingrese un número válido", "Error", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                        Mina mina = new Mina(cantidadAcero, cadenciaAcero, orientacionFabrica, xSeleccionado, ySeleccionado);
+                        datosAEnviar.add(mina);
+                        datosAEnviar.add(conector.getCoordenadas());
+                        break;
                     }
                     case 2:{
-                        //Mina
+                        //Mercado
+                        Mercado mercado = new Mercado(orientacionFabrica, xSeleccionado, ySeleccionado);
+                        datosAEnviar.add(mercado);
+                        datosAEnviar.add(conector.getCoordenadas());
+                        break;
                     }
                     case 3:{
-                        //Mercado                    
+                        //Templo
+                        Templo templo = new Templo(orientacionFabrica, xSeleccionado, ySeleccionado);
+                        datosAEnviar.add(templo);
+                        datosAEnviar.add(conector.getCoordenadas());
+                        break;
                     }
                     case 4:{
                         //Mundo
+                        Mundo mundo = new Mundo(xSeleccionado, ySeleccionado);
+                        datosAEnviar.add(mundo);
+                        datosAEnviar.add(conector.getCoordenadas());
+                        break;
                     }
                     case 5:{
-                        //Templo
+                        //Conector
+                        Mundo mundo = (Mundo)JOptionPane.showInputDialog(null, "Elija un mundo",
+                                "Conectar Elemento", JOptionPane.QUESTION_MESSAGE, null,
+                                this.jugadorPropio.getGrafoPropio().obtenerMundosDisponibles().toArray(), 0);
+                        Conector conectorNuevo = new Conector(xSeleccionado, ySeleccionado, mundo);
+                        datosAEnviar.add(conectorNuevo);
+                        datosAEnviar.add(mundo.getCoordenadas());
+                        break;
+                    }
+                    case 6:{
+                        //Mundo
+                        Mundo mundo = new Mundo(xSeleccionado, ySeleccionado);
+                        datosAEnviar.add(mundo);
+                        break;
+                    }
+                    case 7:{
+                        //Comodin
+                        Comodin comodin = new Comodin();
+                        datosAEnviar.add(comodin);
+                        break;
                     }
                 }
                 this.jugadorPropio.realizarPeticion(new Mensaje(TipoMensaje.nuevoElemento, datosAEnviar));

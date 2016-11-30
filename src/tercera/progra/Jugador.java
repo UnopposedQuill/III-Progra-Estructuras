@@ -31,8 +31,9 @@ public class Jugador extends Thread implements Serializable{
     private int dineroJugador;
     private int aceroJugador;
     private int numeroJugador;
+    private int puertoServer;
     private String huesped = "localhost";
-    private final int puerto = 5000;
+    private int puerto = 5000;
     private final ArrayList<Arma> armasJugador = new ArrayList<>();
     private JFrameGuerraMundos ventanaPropia;
 
@@ -41,13 +42,14 @@ public class Jugador extends Thread implements Serializable{
         this.IP = null;
     }
     
-    public Jugador(String nombreJugador, GrafoObjetos grafoPropio, String huesped) {
+    public Jugador(String nombreJugador, GrafoObjetos grafoPropio, String huesped,int puertoServer) {
         this.nombreJugador = nombreJugador;
         this.grafoPropio = grafoPropio;
         this.aceroJugador = 0;
         this.dineroJugador = 4000;
         this.numeroJugador = -1;
         this.huesped = huesped;
+        this.puertoServer = puertoServer;
         try { 
             this.IP = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException ex) {
@@ -83,28 +85,6 @@ public class Jugador extends Thread implements Serializable{
         return nombreJugador;
     }
 
-    public void setHuesped(String huesped) {
-        this.huesped = huesped;
-    }
-
-    /*
-    public OutputStream getConexionSalida() {
-        return conexionSalida;
-    }
-
-    public ObjectOutputStream getFlujoDeSalida() {
-        return flujoDeSalida;
-    }
-
-    public InputStream getConexionEntrada() {
-        return conexionEntrada;
-    }
-
-    public ObjectInputStream getFlujoDeEntrada() {
-        return flujoDeEntrada;
-    }
-    */
-
     public ArrayList<Arma> getArmasJugador() {
         return armasJugador;
     }
@@ -127,6 +107,10 @@ public class Jugador extends Thread implements Serializable{
 
     public String getIP() {
         return IP;
+    }
+
+    public void setHuesped(String huesped) {
+        this.huesped = huesped;
     }
     
     @Override
@@ -156,10 +140,11 @@ public class Jugador extends Thread implements Serializable{
      */
     @Override
     public void run() {
+        Mensaje recibido = (Mensaje)realizarPeticion(new Mensaje(TipoMensaje.obtenerPuertoServer, null));
+        this.puertoServer = 2000 + (int)recibido.getDatoDeRespuesta();
         while(true){
             try {
-                ServerSocket serverSocketActualizaciones = new ServerSocket(5001);
-                
+                ServerSocket serverSocketActualizaciones = new ServerSocket(puertoServer);
                 Socket recibirDatos = serverSocketActualizaciones.accept();//recibo datos
                 InputStream conexionEntrada = recibirDatos.getInputStream();
                 ObjectInputStream flujoDeEntrada = new ObjectInputStream(conexionEntrada);

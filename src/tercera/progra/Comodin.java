@@ -20,4 +20,8 @@ public class Comodin {
         int random = ((int) (randomizador.nextDouble() * 6 + randomizador.nextDouble())) + 6;
         this.golpesRestantes = random;
     }
+
+    public int getGolpesRestantes() {
+        return golpesRestantes;
+    }
 }
