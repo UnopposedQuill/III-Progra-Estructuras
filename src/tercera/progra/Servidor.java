@@ -226,17 +226,21 @@ public class Servidor extends Thread{
                     Partida partidaAModificar = this.encontrarPartidaDelJugador(ataque.getBlancoDelAtaque());
                     System.out.println("Se consiguieron correctamente los datos del ataque");
                     int resultado = partidaAModificar.getJugadores().get(partidaAModificar.getJugadores().indexOf(ataque.getBlancoDelAtaque())).getGrafoPropio().agregarDanhos(ataque.getCoordenadaDeAtaque());
-                    if(resultado == 1){
-                        System.out.println("Se agregaron los daños correctamente");
-                    }
-                    else if (resultado == 0){
-                        System.out.println("No se agregaron correctamente los daños");
-                    }
-                    else if (resultado == 2){
-                        System.out.println("Se agregaron los daños correctamente y pegó en un agujero negro");
-                    }
-                    else if (resultado == 3){
-                        System.out.println("No se agregaron correctamente los daños pero se pegó en un agujero negro");
+                    switch (resultado) {
+                        case 1:
+                            System.out.println("Se agregaron los daños correctamente");
+                            break;
+                        case 0:
+                            System.out.println("No se agregaron correctamente los daños");
+                            break;
+                        case 2:
+                            System.out.println("Se agregaron los daños correctamente y pegó en un agujero negro");
+                            break;
+                        case 3:
+                            System.out.println("No se agregaron correctamente los daños pero se pegó en un agujero negro");
+                            break;
+                        default:
+                            break;
                     }
                     mensajeAAtender.setDatoDeRespuesta(resultado);
                     try{
@@ -331,14 +335,18 @@ public class Servidor extends Thread{
                     System.out.println("Se desea agregar un nuevo elemento");
                     ArrayList <Object> datosMensaje = (ArrayList<Object>)mensajeAAtender.getDatoDeSolicitud();
                     Partida partidaAModificar = this.encontrarPartidaDelJugador((Jugador)datosMensaje.get(0));
+                    Jugador jugadorAModificar = partidaAModificar.getJugadores().get(partidaAModificar.getJugadores().indexOf((Jugador)datosMensaje.get(0)));
                     Elemento elementoAAgregar = (Elemento)datosMensaje.get(1);
                     if(elementoAAgregar instanceof Fabrica){
                         System.out.println("Fábrica");
+                        mensajeAAtender.setDatoDeRespuesta(false);
                     }
                     else{
                         System.out.println("Elemento");
+                        jugadorAModificar.getGrafoPropio().agregarNuevoVertice(elementoAAgregar);
+                        mensajeAAtender.setDatoDeRespuesta(true);
                     }
-                    mensajeAAtender.setDatoDeRespuesta(false);
+                    
                     try{
                         this.flujoDeSalida.writeObject(mensajeAAtender);
                         System.out.println("Mensaje enviado de vuelta correctamente");

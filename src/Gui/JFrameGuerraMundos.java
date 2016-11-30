@@ -261,9 +261,14 @@ public class JFrameGuerraMundos extends JFrame implements java.io.Serializable{
 
         LabelTurno.setText("Turno del Jugador: Jugador 1");
 
-        TipoFabricaComprar.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        TipoFabricaComprar.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Armeria", "Comodin", "Mina", "Mercado", "Mundo", "Templo" }));
 
         FabricaComprar.setText("Comprar");
+        FabricaComprar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                FabricaComprarActionPerformed(evt);
+            }
+        });
 
         NumeroMundo.setText("Número de Mundo: 0");
 
@@ -455,7 +460,50 @@ public class JFrameGuerraMundos extends JFrame implements java.io.Serializable{
 
     private void cambiarHostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cambiarHostActionPerformed
         // TODO add your handling code here:
+        this.jugadorPropio.setHuesped((String)JOptionPane.showInputDialog("Ingrese el nuevo huésped"));
+        boolean offline = !(boolean)(this.jugadorPropio.realizarPeticion(new Mensaje(TipoMensaje.activado, null)).getDatoDeRespuesta());
+        this.Desconectado.setVisible(offline);
+        this.cambiarHost.setVisible(offline);
     }//GEN-LAST:event_cambiarHostActionPerformed
+
+    private void FabricaComprarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FabricaComprarActionPerformed
+        // TODO add your handling code here:
+        if(this.Mundo.getSelectedColumn() != -1 && this.Mundo.getSelectedRow() != -1){
+            //había alguna localización seleccionada
+            //Object objetoEnCelda = this.Mundo.getModel().getValueAt(this.Mundo.getSelectedRow(), this.Mundo.getSelectedColumn());
+            int xSeleccionado = this.Mundo.getSelectedRow();
+            int ySeleccionado = this.Mundo.getSelectedColumn();
+            Object [][] datosTabla = this.jugadorPropio.getGrafoPropio().generarMatriz();
+            if((TipoFabrica)datosTabla[xSeleccionado][ySeleccionado] == TipoFabrica.BLANK){
+                ArrayList <Object> datosAEnviar = new ArrayList<>();
+                datosAEnviar.add(this.jugadorPropio);
+                switch(this.TipoFabricaComprar.getSelectedIndex()){                    
+                    case 0:{
+                        //Armeria
+                        //Genero  elGenero = (Genero) JOptionPane.showInputDialog(null, "Genero", "titulo", 
+                        //                JOptionPane.QUESTION_MESSAGE, null, 
+                        //               Genero.values(), 0);
+                    }
+                    case 1:{
+                        //Comodin
+                    }
+                    case 2:{
+                        //Mina
+                    }
+                    case 3:{
+                        //Mercado                    
+                    }
+                    case 4:{
+                        //Mundo
+                    }
+                    case 5:{
+                        //Templo
+                    }
+                }
+                this.jugadorPropio.realizarPeticion(new Mensaje(TipoMensaje.nuevoElemento, datosAEnviar));
+            }
+        }
+    }//GEN-LAST:event_FabricaComprarActionPerformed
 
     /**
      * @param args the command line arguments

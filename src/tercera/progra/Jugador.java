@@ -83,6 +83,10 @@ public class Jugador extends Thread implements Serializable{
         return nombreJugador;
     }
 
+    public void setHuesped(String huesped) {
+        this.huesped = huesped;
+    }
+
     /*
     public OutputStream getConexionSalida() {
         return conexionSalida;
